@@ -585,21 +585,38 @@ function showLoginModal() {
   document.getElementById('modal-login').style.display = 'flex';
 }
 
-function submitLogin() {
+async function submitLogin() {
   const pwd = document.getElementById('login-pwd').value.trim();
   const err = document.getElementById('login-err');
-  if (login(pwd)) {
+  const btn = document.querySelector('#modal-login button');
+
+  // Bloquer si champ vide
+  if (!pwd) {
+    err.textContent = '⚠️ Veuillez saisir votre mot de passe.';
+    err.style.display = 'block';
+    document.getElementById('login-pwd').focus();
+    return;
+  }
+
+  err.style.display = 'none';
+  if (btn) { btn.textContent = '⏳ Vérification…'; btn.disabled = true; }
+
+  const ok = await login(pwd);
+
+  if (ok) {
     document.getElementById('modal-login').style.display = 'none';
+    const hu   = document.getElementById('header-user');
+    const auth = getAuth();
+    if (hu && auth) hu.textContent = auth.nom;
     renderGrid();
     initSemestre();
     afficherAccueil();
-    const hu = document.getElementById('header-user');
-    const auth = getAuth();
-    if (hu && auth) hu.textContent = auth.nom;
   } else {
+    err.textContent = '❌ Mot de passe incorrect. Contactez Fabien Girard.';
     err.style.display = 'block';
     document.getElementById('login-pwd').value = '';
     document.getElementById('login-pwd').focus();
+    if (btn) { btn.textContent = "Accéder à l'appli →"; btn.disabled = false; }
   }
 }
 
