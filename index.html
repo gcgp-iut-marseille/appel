@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Appel — BUT1 GCGP 2026-2027</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+  #header {
+    background: #1e3a5f; color: #fff;
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  #header h1 { font-size: 20px; font-weight: 800; }
+  #header p  { font-size: 12px; opacity: 0.65; margin-top: 2px; }
+  .tab-bar { display: flex; gap: 6px; }
+  .tab {
+    padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.15); color: #fff;
+    font-weight: 600; font-size: 13px;
+  }
+  .tab.active { background: #fff; color: #1e3a5f; }
+
+  #main { max-width: 1000px; margin: 0 auto; padding: 20px 16px; }
+
+  .top-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .top-row { flex-wrap: wrap; }
+  .top-row input, .top-row select {
+    padding: 8px 12px;
+    border-radius: 8px; border: 1.5px solid #d1d5db;
+    font-size: 13px; outline: none; background: #fff;
+  }
+  .top-row select { cursor: pointer; }
+
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-label { font-size: 13px; font-weight: 600; color: #444; margin-right: 4px; }
+  .filt {
+    padding: 6px 14px; border-radius: 20px; border: 2px solid #d1d5db;
+    background: #fff; cursor: pointer; font-size: 13px; font-weight: 600;
+    color: #555; transition: all .15s;
+  }
+  .filt.active { border-color: #1e3a5f; background: #1e3a5f; color: #fff; }
+  .sep { width: 1px; height: 28px; background: #d1d5db; margin: 0 4px; }
+
+  /* LÉGENDE STATUTS */
+  .legend {
+    display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 16px; padding: 10px 14px;
+    background: #fff; border-radius: 10px; border: 1px solid #e5e7eb;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+  .legend-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+
+  .action-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .stat-text  { font-size: 13px; color: #444; flex: 1; min-width: 200px; }
+  .btn { padding: 8px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; color: #fff; }
+  .btn-green  { background: #16a34a; }
+  .btn-gray   { background: #6b7280; }
+  .btn-export { background: #1e3a5f; padding: 12px 28px; font-size: 15px; border-radius: 10px; }
+
+  #grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  /* CARTE — 4 états */
+  .card {
+    cursor: pointer; border: 2.5px solid #e5e7eb; border-radius: 14px;
+    padding: 16px 12px 12px; background: #fff;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: all .15s; user-select: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  /* absent = défaut (gris) */
+  .card.present   { border-color: #22c55e; background: #f0fdf4; box-shadow: 0 2px 10px rgba(34,197,94,.18); }
+  .card.retard1   { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 2px 10px rgba(245,158,11,.18); }
+  .card.retard2   { border-color: #ef4444; background: #fff1f1; box-shadow: 0 2px 10px rgba(239,68,68,.18); }
+  .card.exclu     { border-color: #6b7280; background: #f9fafb; box-shadow: 0 2px 10px rgba(107,114,128,.18); opacity: .75; }
+
+  .avatar-wrap { position: relative; }
+  .avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; overflow: hidden; flex-shrink: 0;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .badge {
+    position: absolute; bottom: 0; right: 0;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #d1d5db; border: 2.5px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #fff; font-weight: 700;
+    transition: background .15s;
+  }
+  .card.present .badge { background: #22c55e; }
+  .card.retard1 .badge { background: #f59e0b; }
+  .card.retard2 .badge { background: #ef4444; }
+
+  .card-name   { font-weight: 700; font-size: 13px; color: #111; text-align: center; line-height: 1.3; }
+  .card-prenom { font-size: 13px; color: #333; text-align: center; font-weight:600; }
+  .card-group  { font-size: 10px; color: #888; background: #f3f4f6; padding: 2px 7px; border-radius: 10px; }
+  .card-status { font-size: 10px; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; color: #9ca3af; }
+  .card.present .card-status { color: #16a34a; }
+  .card.retard1 .card-status { color: #d97706; }
+  .card.retard2 .card-status { color: #ef4444; }
+  .card.exclu   .card-status { color: #6b7280; }
+  .card.exclu   .badge       { background: #6b7280; }
+  .tiers-temps { position:absolute;top:-4px;left:-4px;background:#7c3aed;color:#fff;font-size:9px;font-weight:800;padding:2px 5px;border-radius:6px;letter-spacing:.3px; }
+
+  /* RÉCAP */
+  .stat-cards { display: flex; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-card  { background: #fff; border-radius: 12px; padding: 14px 20px; min-width: 100px; border-top: 4px solid; }
+  .stat-card .val { font-size: 26px; font-weight: 800; }
+  .stat-card .lbl { font-size: 12px; color: #666; margin-top: 2px; }
+
+  .list-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .chip { display: flex; align-items: center; gap: 8px; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
+  .chip-absent  { background: #f9fafb; border: 1px solid #e5e7eb; color: #374151; }
+  .chip-present { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .chip-retard1 { background: #fffbeb; border: 1px solid #fde68a; }
+  .chip-retard2 { background: #fff1f1; border: 1px solid #fecaca; }
+  .chip-exclu   { background: #f3f4f6; border: 1px solid #d1d5db; color: #6b7280; }
+  .chip-avatar  { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+  .chip-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+  .hidden { display: none; }
+
+  /* ── MOBILE ─────────────────────────────────────── */
+  @media (max-width: 600px) {
+    #header { padding: 12px 14px; }
+    #header h1 { font-size: 16px; }
+    .tab { padding: 6px 10px; font-size: 12px; }
+    #main { padding: 14px 10px; }
+    .top-row { flex-direction: column; gap: 8px; }
+    .top-row select, .top-row input { width: 100%; min-width: unset; font-size: 14px; padding: 10px 12px; }
+    .filter-bar { gap: 6px; }
+    .filt { padding: 7px 11px; font-size: 12px; }
+    .action-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .action-bar .btn { width: 100%; padding: 12px; font-size: 14px; text-align: center; }
+    .stat-text { text-align: center; }
+    #grille { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+    .card { padding: 12px 8px 10px; gap: 6px; }
+    .avatar { width: 56px !important; height: 56px !important; font-size: 17px !important; }
+    .card-name { font-size: 11px; }
+    .card-prenom { font-size: 10px; }
+    .card-group { font-size: 9px; }
+    .card-status { font-size: 9px; }
+    .badge { width: 18px; height: 18px; font-size: 10px; }
+    .legend { gap: 8px; font-size: 11px; }
+    .stat-cards { gap: 8px; }
+    .stat-card { padding: 10px 14px; min-width: 80px; }
+    .stat-card .val { font-size: 22px; }
+    .btn-export { width: 100%; padding: 14px; font-size: 14px; text-align: center; }
+    .btn-mail   { width: 100%; padding: 14px; font-size: 14px; text-align: center; }
+    .btn-save   { width: 100%; padding: 14px; font-size: 14px; text-align: center; }
+    .export-btns { flex-direction: column; }
+    .chip { font-size: 11px; padding: 5px 8px; }
+    .sep { display: none; }
+  }
+
+  /* ── BOUTONS EXPORT ────────────────────────────── */
+  .export-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .btn-mail { background: #0ea5e9; padding: 12px 22px; font-size: 14px; border-radius: 10px; border: none; cursor: pointer; color:#fff; font-weight:600; }
+  .btn-save { background: #7c3aed; padding: 12px 22px; font-size: 14px; border-radius: 10px; border: none; cursor: pointer; color:#fff; font-weight:600; }
+
+  /* ── HISTORIQUE BDD ────────────────────────────── */
+  #panel-bdd { }
+  .bdd-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .bdd-table-wrap { overflow-x:auto; }
+  table.bdd { width:100%; border-collapse:collapse; font-size:12px; }
+  table.bdd th { background:#1e3a5f; color:#fff; padding:8px 10px; text-align:left; white-space:nowrap; }
+  table.bdd td { padding:7px 10px; border-bottom:1px solid #e5e7eb; vertical-align:top; }
+  table.bdd tr:hover td { background:#f8fafc; }
+  .badge-absent  { background:#fee2e2; color:#b91c1c; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; }
+  .badge-retard1 { background:#fef3c7; color:#92400e; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; }
+  .badge-retard2 { background:#fecaca; color:#dc2626; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; }
+  .badge-present { background:#dcfce7; color:#166534; border-radius:6px; padding:2px 7px; font-size:11px; font-weight:600; }
+  .empty-bdd { text-align:center; color:#9ca3af; padding:40px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>📋 Feuille d'appel</h1>
+    <p>BUT1 GCGP — 2026-2027 — IUT Marseille</p>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="showTab('appel')">Appel</button>
+    <button class="tab" id="tab-recap" onclick="showTab('recap')">Récap</button>
+    <button class="tab" onclick="showTab('bdd')">📊 Historique</button>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- ONGLET APPEL -->
+  <div id="panel-appel">
+    <div class="top-row">
+      <select id="inp-semestre" onchange="updateMatières()" style="min-width:90px;padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff;color:#111;cursor:pointer">
+        <option value="S1" selected>S1</option>
+        <option value="S2">S2</option>
+      </select>
+      <select id="inp-seance" style="flex:2;min-width:200px;padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff;color:#111">
+        <option value="">— Choisir un cours —</option>
+      </select>
+      <input id="inp-enseignant" placeholder="Votre nom (optionnel)" style="min-width:150px;padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff" />
+      <input id="inp-seance-custom" placeholder="Intitulé du cours…" style="display:none;flex:2;min-width:200px;padding:8px 12px;border-radius:8px;border:1.5px solid #f59e0b;font-size:13px;outline:none;background:#fff" />
+      <select id="inp-heure" style="min-width:130px;padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff;color:#111">
+        <option value="">— Horaire —</option>
+        <option value="08:30">8h30</option>
+        <option value="10:30">10h30</option>
+        <option value="13:30">13h30</option>
+        <option value="15:30">15h30</option>
+      </select>
+      <input id="inp-date" type="date" style="min-width:140px;padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff" />
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">TD :</span>
+      <button class="filt active" onclick="setFilter('td','all')">Tous</button>
+      <button class="filt" onclick="setFilter('td','A')">TDA</button>
+      <button class="filt" onclick="setFilter('td','B')">TDB</button>
+      <div class="sep"></div>
+      <span class="filter-label">TP :</span>
+      <button class="filt active" onclick="setFilter('tp','all')">Tous</button>
+      <button class="filt" onclick="setFilter('tp','1')">TP1</button>
+      <button class="filt" onclick="setFilter('tp','2')">TP2</button>
+      <button class="filt" onclick="setFilter('tp','3')">TP3</button>
+      <button class="filt" onclick="setFilter('tp','4')">TP4</button>
+    </div>
+
+    <!-- Légende -->
+    <div class="legend">
+      <span style="font-size:12px;color:#666;font-weight:600;margin-right:4px">1 clic :</span>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> Présent·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d1d5db"></div> Absent·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Retard &lt; 15 min</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Retard &gt; 15 min</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div> Exclu·e</div>
+      <span style="font-size:11px;color:#aaa;margin-left:4px">(cycle au clic)</span>
+    </div>
+
+    <div class="action-bar">
+      <span class="stat-text" id="stat-inline">— présent·e·s</span>
+      <button class="btn btn-green" onclick="markVisible('present')">✓ Tous présents</button>
+      <button class="btn btn-gray"  onclick="markVisible('absent')">✗ Tout effacer</button>
+    </div>
+
+    <div id="grille"></div>
+    <div style="margin-top:20px;text-align:center">
+      <button onclick="showTab('recap');envoyerAMUBox()" style="background:#16a34a;color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3)">
+        ✅ Enregistrer l'appel
+      </button>
+      <div style="font-size:11px;color:#9ca3af;margin-top:8px">Envoie les données et les sauvegarde</div>
+    </div>
+  </div>
+
+  <!-- ONGLET RÉCAP -->
+  <div id="panel-recap" class="hidden">
+    <div class="stat-cards" id="stat-cards"></div>
+    <div id="list-absents"></div>
+    <div id="list-retard2"></div>
+    <div id="list-retard1"></div>
+    <div id="list-exclus"></div>
+    <div id="list-presents"></div>
+    <div id="msg-correction" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:13px;color:#92400e;margin-bottom:12px">
+      ⚠️ Un appel a déjà été enregistré pour cette séance. Cliquer sur "Enregistrer" <b>écrasera</b> les données précédentes.
+    </div>
+    <div class="export-btns">
+      <button class="btn btn-export" onclick="exportXLSX()">⬇️ Exporter Excel</button>
+      <button class="btn btn-mail"   onclick="envoyerMail()">✉️ Envoyer à la secrétaire</button>
+      <button id="btn-amubox" class="btn" style="background:#16a34a;padding:12px 22px;font-size:14px;border-radius:10px;border:none;cursor:pointer;color:#fff;font-weight:600" onclick="envoyerAMUBox()">✅ Enregistrer l'appel</button>
+      <button class="btn btn-save"   onclick="sauvegarderBDD()">💾 Historique local</button>
+    </div>
+  </div>
+
+  <!-- ONGLET HISTORIQUE -->
+  <div id="panel-bdd" class="hidden">
+    <div class="bdd-header">
+      <h2 style="font-size:16px;font-weight:800;flex:1">📊 Historique des appels</h2>
+      <button class="btn btn-export" onclick="exportBDD()" style="padding:8px 16px;font-size:13px">⬇️ Exporter tout en Excel</button>
+      <button class="btn" style="background:#ef4444;padding:8px 16px;font-size:13px" onclick="viderBDD()">🗑️ Vider l'historique</button>
+    </div>
+    <div id="bdd-stats" style="margin-bottom:16px"></div>
+    <div class="bdd-table-wrap">
+      <table class="bdd">
+        <thead><tr>
+          <th>Date</th><th>Heure</th><th>Cours</th><th>Groupe</th>
+          <th>Nom</th><th>Prénom</th><th>N° étudiant</th><th>TD</th><th>TP</th><th>Statut</th>
+        </tr></thead>
+        <tbody id="bdd-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PHOTOS = {}; // Photos à ajouter en septembre 2026
+
+
+const MATIERES = {
+  S1: [
+    { groupe: "Sciences fondamentales", items: [
+      "Unités et dimensions", "Mathématiques", "Maths pour la Physique",
+      "Physique", "TP Physique", "Atomistique", "Matériaux"
+    ]},
+    { groupe: "Chimie et procédés", items: [
+      "Intro au génie des procédés", "Équilibres en solution", "Schémas procédés",
+      "Mécanique des fluides", "Thermodynamique", "Métrologie", "Bilans",
+      "TP Chimie", "TP Transfert Thermique", "TP Procédés"
+    ]},
+    { groupe: "Outils et méthodes", items: [
+      "Outils info", "Compte-rendu et rapport", "Supports de communication",
+      "Sécurité", "Environnement Qualité"
+    ]},
+    { groupe: "Langues et communication", items: [
+      "Communication PPP", "Anglais"
+    ]},
+    { groupe: "SAÉ", items: [
+      "SAÉ Produire", "SAÉ Contrôler", "SAÉ Concevoir"
+    ]},
+  ],
+  S2: [
+    { groupe: "Sciences fondamentales", items: [
+      "Mathématiques", "Physique", "TP Physique", "Cinétique", "Énergétique"
+    ]},
+    { groupe: "Chimie et procédés", items: [
+      "Orga-Bio", "Fluide utilitaire", "Opération Solide-Fluide",
+      "Méca Flu", "Transfert thermique", "TP Chimie", "TP Procédés"
+    ]},
+    { groupe: "Outils et méthodes", items: [
+      "Comm", "PPP"
+    ]},
+    { groupe: "Langues et communication", items: [
+      "Anglais"
+    ]},
+    { groupe: "SAÉ", items: [
+      "SAÉ Concevoir", "SAÉ Contrôler", "SAÉ Produire"
+    ]},
+  ]
+};
+
+function updateMatières() {
+  const sem = document.getElementById('inp-semestre').value;
+  const sel = document.getElementById('inp-seance');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Choisir un cours —</option>';
+  MATIERES[sem].forEach(cat => {
+    const grp = document.createElement('optgroup');
+    grp.label = cat.groupe;
+    cat.items.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      if (m === current) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+  const autre = document.createElement('option');
+  autre.value = '__autre__'; autre.textContent = '✏️ Autre (saisir manuellement)';
+  sel.appendChild(autre);
+}
+
+// Init au chargement — S1 de sept à jan, S2 de fev à juillet
+function initSemestre() {
+  const mois = new Date().getMonth() + 1; // 1=jan ... 12=dec
+  const sem = (mois >= 9 || mois === 1) ? 'S1' : 'S2';
+  document.getElementById('inp-semestre').value = sem;
+  updateMatières();
+}
+
+// ─── CONFIG GOOGLE SHEETS ────────────────────────────────────
+const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
+
+async function gsheetsWrite(payload) {
+  const resp = await fetch(GSHEETS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  });
+  const json = await resp.json();
+  return json.status === 'ok';
+}
+
+
+// ─── DURÉES DES COURS ────────────────────────────────────────
+function getDureeHeures(seance) {
+  if (!seance) return 2;
+  const s = seance.toLowerCase();
+  if (s.includes('tp procédés') || s.includes('tp procedes')) return 8;
+  if (s.includes('tp')) return 4;
+  return 2; // CM, TD, tout le reste
+}
+
+
+// ─── MAIL DE SECOURS (si AMUBox inaccessible) ───────────────
+function envoyerMailSecours() {
+  const vis      = visible();
+  const seance   = getSeanceLabel();
+  const heure    = getHeureLabel();
+  const sem      = document.getElementById('inp-semestre')?.value || 'S2';
+  const date     = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const dateStr  = date.split('-').reverse().join('/');
+  const label    = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+  const enseignant = document.getElementById('inp-enseignant')?.value || 'Non renseigné';
+  const duree    = getDureeHeures(seance);
+
+  const groupes  = { present:[], retard1:[], retard2:[], absent:[] };
+  vis.forEach(s => groupes[getStatut(s.id)].push(s));
+
+  const fmt = arr => arr.length
+    ? arr.map(s => `  - ${s.nom} ${s.prenom} | ${s.id} | TD${s.td}/TP${s.tp}`).join('\n')
+    : '  (aucun)';
+
+  // Données JSON complètes pour reconstitution dans le tableau de bord
+  const payload = {
+    date, heure, semestre: sem, cours: seance, groupe: label,
+    duree_heures: duree, enseignant,
+    enregistre_le: new Date().toISOString(),
+    etudiants: vis.map(s => ({
+      id: s.id, nom: s.nom, prenom: s.prenom,
+      td: s.td, tp: s.tp,
+      statut: getStatut(s.id),
+      statut_label: LABELS[getStatut(s.id)]
+    }))
+  };
+
+  const corps =
+`[SECOURS — AMUBox inaccessible]
+Feuille de présence — BUT1 GCGP ${sem}
+Enseignant : ${enseignant}
+Cours      : ${seance}
+Groupe     : ${label}
+Date       : ${dateStr}  |  Début : ${heure || '—'}
+Durée      : ${duree}h
+Présents   : ${groupes.present.length} / ${vis.length}
+
+❌ ABSENTS (${groupes.absent.length}) :
+${fmt(groupes.absent)}
+
+⚠️ RETARDS > 15 min (${groupes.retard2.length}) :
+${fmt(groupes.retard2)}
+
+⏱️ RETARDS < 15 min (${groupes.retard1.length}) :
+${fmt(groupes.retard1)}
+
+--- DONNÉES JSON (pour import tableau de bord) ---
+${JSON.stringify(payload)}`;
+
+  const sujet = `[APPEL SECOURS] ${seance} — ${label} — ${dateStr} ${heure}`.trim();
+  const mailto = `mailto:fabien.girard@univ-amu.fr?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+  window.location.href = mailto;
+}
+
+// ─── ENVOI GOOGLE SHEETS ─────────────────────────────────────
+async function envoyerAMUBox() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const sem    = document.getElementById('inp-semestre')?.value || 'S2';
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const label  = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+
+  if (!seance || seance === 'Séance') { alert('Veuillez choisir un cours.'); return; }
+  if (!heure) { alert('Veuillez choisir un horaire.'); return; }
+
+  const duree = getDureeHeures(seance);
+
+  const payload = {
+    date, heure, semestre: sem, cours: seance, groupe: label,
+    duree_heures: duree,
+    pwd: getAuth()?.pwd || '',
+    enseignant: document.getElementById('inp-enseignant')?.value || getAuth()?.nom || '',
+    enregistre_le: new Date().toISOString(),
+    etudiants: vis.map(s => ({
+      id: s.id, nom: s.nom, prenom: s.prenom,
+      td: s.td, tp: s.tp,
+      statut: getStatut(s.id),
+      statut_label: LABELS[getStatut(s.id)]
+    }))
+  };
+
+  // Vérifier doublon et demander confirmation
+  const bdd_check = getBDD();
+  const key_check = `${date}_${heure}_${seance}_${label}`;
+  const doublon = bdd_check.some(r => `${r.date}_${r.heure}_${r.cours}_${r.groupe}` === key_check);
+  if (doublon) {
+    const ok = window.confirm("Un appel a déjà été enregistré pour cette séance.\nVoulez-vous écraser les données précédentes ?");
+    if (!ok) return;
+  }
+
+  const btn = document.getElementById('btn-amubox');
+  btn.textContent = '⏳ Envoi en cours…';
+  btn.disabled = true;
+
+  try {
+    const ok = await gsheetsWrite(payload);
+    if (ok) {
+      btn.textContent = '✅ Envoyé !';
+      btn.style.background = '#16a34a';
+      sauvegarderBDD();
+    } else {
+      throw new Error('Réponse inattendue');
+    }
+  } catch(e) {
+    btn.textContent = '❌ Échec';
+    btn.style.background = '#ef4444';
+    sauvegarderBDD();
+    const continuer = confirm('Envoi échoué.\nVoulez-vous envoyer les données par mail à la place ?');
+    if (continuer) envoyerMailSecours();
+    else alert('Données sauvegardées localement.');
+  }
+  setTimeout(() => {
+    btn.textContent = "✅ Enregistrer l'appel";
+    btn.style.background = '#16a34a';
+    btn.disabled = false;
+  }, 3000);
+}
+
+
+// ─── SÉCURITÉ — MOTS DE PASSE ────────────────────────────────
+// Les mots de passe sont vérifiés côté serveur (Apps Script)
+// Ils ne sont plus stockés dans le HTML
+
+const AUTH_KEY = 'gcgp_auth';
+
+function getAuth() {
+  try { return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); }
+  catch(e) { return null; }
+}
+
+function checkAuth() {
+  const auth = getAuth();
+  if (auth && auth.pwd && auth.nom) {
+    // Déjà connecté (vérifié lors de la dernière session)
+    const inp = document.getElementById('inp-enseignant');
+    if (inp && !inp.value) inp.value = auth.nom;
+    return true;
+  }
+  return false;
+}
+
+async function login(pwd) {
+  try {
+    const resp = await fetch(GSHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ type: 'auth', pwd })
+    });
+    const json = await resp.json();
+    if (json.status !== 'ok') return false;
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ pwd, nom: json.nom }));
+    const inp = document.getElementById('inp-enseignant');
+    if (inp) inp.value = json.nom;
+    return true;
+  } catch(e) {
+    console.error('Erreur auth:', e);
+    return false;
+  }
+}
+
+function logout() {
+  localStorage.removeItem(AUTH_KEY);
+  showLoginModal();
+}
+
+function showLoginModal() {
+  document.getElementById('modal-login').style.display = 'flex';
+}
+
+function submitLogin() {
+  const pwd = document.getElementById('login-pwd').value.trim();
+  const err = document.getElementById('login-err');
+  if (login(pwd)) {
+    document.getElementById('modal-login').style.display = 'none';
+    renderGrid();
+    initSemestre();
+    afficherAccueil();
+    const hu = document.getElementById('header-user');
+    const auth = getAuth();
+    if (hu && auth) hu.textContent = auth.nom;
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-pwd').value = '';
+    document.getElementById('login-pwd').focus();
+  }
+}
+
+// ─── CYCLE DES STATUTS ──────────────────────────────────────
+// absent → present → retard1 → retard2 → absent
+const CYCLE  = ['present','absent','retard1','retard2','exclu'];
+const LABELS = { absent:'Absent·e', present:'Présent·e', retard1:'Retard < 15 min', retard2:'Retard > 15 min', exclu:'Exclu·e' };
+const BADGES = { absent:'—', present:'✓', retard1:'⏱', retard2:'⚠', exclu:'🚫' };
+
+// ─── DONNÉES ────────────────────────────────────────────────
+const STUDENTS = [
+  {id:"2627-001", nom:"AZZOUG", prenom:"Ilyes", td:"A", tp:"1"},
+  {id:"2627-002", nom:"BOBICHON", prenom:"Antoine", td:"A", tp:"1"},
+  {id:"2627-003", nom:"CHENAITIA", prenom:"Leslie", td:"A", tp:"1"},
+  {id:"2627-004", nom:"CHUINE", prenom:"Mathis", td:"A", tp:"1"},
+  {id:"2627-005", nom:"COPPOLANI", prenom:"Antoine", td:"A", tp:"1"},
+  {id:"2627-006", nom:"DE COL", prenom:"Lylou", td:"A", tp:"1"},
+  {id:"2627-007", nom:"DEROUBAIX", prenom:"Eliott", td:"A", tp:"1"},
+  {id:"2627-008", nom:"FALANGA", prenom:"Angelina", td:"A", tp:"1"},
+  {id:"2627-009", nom:"FLANDIN-LATIL", prenom:"Samuel", td:"A", tp:"1"},
+  {id:"2627-010", nom:"GUIDOUM", prenom:"Aymen", td:"A", tp:"1"},
+  {id:"2627-011", nom:"MAOULIDA", prenom:"Aimane", td:"A", tp:"1"},
+  {id:"2627-012", nom:"MORO", prenom:"Cyndie", td:"A", tp:"1"},
+  {id:"2627-013", nom:"NEGRI", prenom:"Baptiste", td:"A", tp:"1"},
+  {id:"2627-014", nom:"ROUSSET", prenom:"Leandre", td:"A", tp:"1"},
+  {id:"2627-015", nom:"SARIKAYA", prenom:"Boran", td:"A", tp:"1"},
+  {id:"2627-016", nom:"TACHON--NAVARRO", prenom:"Amaury", td:"A", tp:"1"},
+  {id:"2627-017", nom:"TRAMONI", prenom:"Lea", td:"A", tp:"1"},
+  {id:"2627-018", nom:"AKHNAZAROV", prenom:"Artur", td:"A", tp:"2"},
+  {id:"2627-019", nom:"ALI MOUSSA", prenom:"Djamaldine", td:"A", tp:"2"},
+  {id:"2627-020", nom:"ARMIEN", prenom:"Olivia", td:"A", tp:"2"},
+  {id:"2627-021", nom:"BARREAU", prenom:"Maël", td:"A", tp:"2"},
+  {id:"2627-022", nom:"BOUMEDDINE", prenom:"Adam", td:"A", tp:"2"},
+  {id:"2627-023", nom:"CHALK", prenom:"Arthur", td:"A", tp:"2"},
+  {id:"2627-024", nom:"COLOMBERO", prenom:"Sixtine", td:"A", tp:"2"},
+  {id:"2627-025", nom:"DEMENTYEVA", prenom:"Uliana", td:"A", tp:"2"},
+  {id:"2627-026", nom:"FERRER--MAZELIER", prenom:"Vincent", td:"A", tp:"2"},
+  {id:"2627-027", nom:"KATEB", prenom:"Hedi", td:"A", tp:"2"},
+  {id:"2627-028", nom:"MERABET", prenom:"Fares", td:"A", tp:"2"},
+  {id:"2627-029", nom:"MOHOVIC", prenom:"Charlotte", td:"A", tp:"2"},
+  {id:"2627-030", nom:"MORTIER", prenom:"Evan", td:"A", tp:"2"},
+  {id:"2627-031", nom:"NDIAYE", prenom:"Thiane", td:"A", tp:"2"},
+  {id:"2627-032", nom:"PETION", prenom:"Elea", td:"A", tp:"2"},
+  {id:"2627-033", nom:"RUGGIERI", prenom:"Giovanni", td:"A", tp:"2"},
+  {id:"2627-034", nom:"AVARELLO", prenom:"Remy", td:"B", tp:"3"},
+  {id:"2627-035", nom:"CHEBBI", prenom:"Yanis", td:"B", tp:"3"},
+  {id:"2627-036", nom:"DAUMAS", prenom:"Bastien", td:"B", tp:"3"},
+  {id:"2627-037", nom:"DREMAZA-MATTEI", prenom:"Loric", td:"B", tp:"3"},
+  {id:"2627-038", nom:"ELKHATARI", prenom:"Hicham", td:"B", tp:"3"},
+  {id:"2627-039", nom:"GIBAUDAN", prenom:"Nina Rose", td:"B", tp:"3"},
+  {id:"2627-040", nom:"GONZALVEZ", prenom:"Evan", td:"B", tp:"3"},
+  {id:"2627-041", nom:"LERAY", prenom:"Sullyvan", td:"B", tp:"3"},
+  {id:"2627-042", nom:"MOHAMMEDI", prenom:"Naim", td:"B", tp:"3"},
+  {id:"2627-043", nom:"OLIVE", prenom:"Sacha", td:"B", tp:"3"},
+  {id:"2627-044", nom:"OUARI", prenom:"Kylian", td:"B", tp:"3"},
+  {id:"2627-045", nom:"PAUL", prenom:"Jade", td:"B", tp:"3"},
+  {id:"2627-046", nom:"POIROT", prenom:"Candice", td:"B", tp:"3"},
+  {id:"2627-047", nom:"SANCHEZ", prenom:"Thibault", td:"B", tp:"3"},
+  {id:"2627-048", nom:"VESY", prenom:"Clarisse", td:"B", tp:"3"},
+  {id:"2627-049", nom:"VOCANSON-SAVARY", prenom:"Mailys", td:"B", tp:"3"},
+  {id:"2627-050", nom:"ALLOEND-BESSAND", prenom:"Tristan", td:"B", tp:"4"},
+  {id:"2627-051", nom:"BOUZAFFOUR", prenom:"Mohamed", td:"B", tp:"4"},
+  {id:"2627-052", nom:"CARABONI", prenom:"Remy", td:"B", tp:"4"},
+  {id:"2627-053", nom:"CHOLBI", prenom:"Lana", td:"B", tp:"4"},
+  {id:"2627-054", nom:"CIVET", prenom:"Dorine", td:"B", tp:"4"},
+  {id:"2627-055", nom:"DE ALFREDO VARGAS", prenom:"Ricardo", td:"B", tp:"4"},
+  {id:"2627-056", nom:"EL AISSATI", prenom:"Naida", td:"B", tp:"4"},
+  {id:"2627-057", nom:"GEOFFROY", prenom:"Adrien", td:"B", tp:"4"},
+  {id:"2627-058", nom:"GRANIER", prenom:"Mathias", td:"B", tp:"4"},
+  {id:"2627-059", nom:"LEFRERE", prenom:"Lily-Violet", td:"B", tp:"4"},
+  {id:"2627-060", nom:"MORIN", prenom:"Lucas", td:"B", tp:"4"},
+  {id:"2627-061", nom:"MOSCATI", prenom:"Eddy", td:"B", tp:"4"},
+  {id:"2627-062", nom:"NAIR", prenom:"Mohammed", td:"B", tp:"4"},
+  {id:"2627-063", nom:"NEFNAF", prenom:"Mounib", td:"B", tp:"4"},
+  {id:"2627-064", nom:"OULAHSEN", prenom:"Amine", td:"B", tp:"4"},
+  {id:"2627-065", nom:"SCHNEIDER", prenom:"Maxence", td:"B", tp:"4"},
+];
+
+const COLORS = [
+  ["#1a6b8a","#e8f4f8"],["#2d7a4f","#e8f5ee"],["#7a3d6b","#f5e8f2"],
+  ["#8a5a1a","#f5f0e8"],["#3d4f8a","#e8eaf5"],["#6b1a2d","#f5e8eb"],
+];
+
+let statuts = {}; // id -> 'absent'|'present'|'retard1'|'retard2'
+let filterTD = 'all', filterTP = 'all';
+
+document.getElementById('inp-date').value = new Date().toISOString().slice(0,10);
+// initSemestre() appelé dans le bloc auth ci-dessous
+
+// Pré-sélectionner l'horaire le plus proche
+(function() {
+  const now = new Date();
+  const h = now.getHours() * 60 + now.getMinutes();
+  const slots = [{v:"08:30",m:510},{v:"10:30",m:630},
+                 {v:"13:30",m:810},{v:"15:30",m:930}];
+  let best = slots[0];
+  for (const s of slots) { if (Math.abs(s.m - h) < Math.abs(best.m - h)) best = s; }
+  document.getElementById('inp-heure').value = best.v;
+})();
+
+// Gestion du select "Autre"
+document.getElementById('inp-seance').addEventListener('change', function() {
+  const custom = document.getElementById('inp-seance-custom');
+  if (this.value === '__autre__') {
+    custom.style.display = 'block';
+    custom.focus();
+  } else {
+    custom.style.display = 'none';
+  }
+});
+
+function getSeanceLabel() {
+  const sel = document.getElementById('inp-seance');
+  if (sel.value === '__autre__') return document.getElementById('inp-seance-custom').value || 'Séance';
+  return sel.value || 'Séance';
+}
+
+function getHeureLabel() {
+  const v = document.getElementById('inp-heure').value;
+  return v ? `${v}` : '';
+}
+
+function getColor(idx) { return COLORS[idx % COLORS.length]; }
+function initials(p, n) { return (p[0]+(n[0]||'')).toUpperCase(); }
+function getStatut(id)  { return statuts[id] || 'present'; }
+
+function avatarHTML(s, size=64) {
+  const idx = STUDENTS.findIndex(x=>x.id===s.id);
+  const [bg,fg] = getColor(idx);
+  const photo = PHOTOS[s.id];
+  if (photo) {
+    return `<div class="avatar" style="width:${size}px;height:${size}px;overflow:hidden">
+      <img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+    </div>`;
+  }
+  return `<div class="avatar" style="width:${size}px;height:${size}px;background:${bg};color:${fg}">${initials(s.prenom,s.nom)}</div>`;
+}
+
+function visible() {
+  return STUDENTS.filter(s =>
+    (filterTD==='all' || s.td===filterTD) &&
+    (filterTP==='all' || s.tp===filterTP)
+  );
+}
+
+function setFilter(type, val) {
+  if (type==='td') { filterTD=val; if(val!=='all') filterTP='all'; }
+  else             { filterTP=val; if(val!=='all') filterTD='all'; }
+  document.querySelectorAll('.filter-bar .filt').forEach(btn => {
+    const oc = btn.getAttribute('onclick');
+    btn.classList.toggle('active',
+      (oc.includes("'td'") && oc.includes("'"+filterTD+"'")) ||
+      (oc.includes("'tp'") && oc.includes("'"+filterTP+"'")));
+  });
+  renderGrid();
+}
+
+function renderGrid() {
+  const vis = visible();
+  document.getElementById('grille').innerHTML = vis.map(s => {
+    const st = getStatut(s.id);
+    return `<div class="card ${st}" onclick="toggle('${s.id}')" id="card-${s.id}">
+      <div class="avatar-wrap">
+        <!-- badge 1/3 temps à reconfigurer en septembre -->
+        ${avatarHTML(s,76)}
+        <div class="badge">${BADGES[st]}</div>
+      </div>
+      <div style="text-align:center">
+        <div class="card-name">${s.nom}</div>
+        <div class="card-prenom">${s.prenom}</div>
+      </div>
+      <!-- badge groupe masqué sur la carte -->
+      <div class="card-status">${LABELS[st]}</div>
+    </div>`;
+  }).join('');
+  updateStat();
+}
+
+function toggle(id) {
+  const cur = getStatut(id);
+  const next = CYCLE[(CYCLE.indexOf(cur)+1) % CYCLE.length];
+  statuts[id] = next;
+  const card = document.getElementById('card-'+id);
+  card.className = 'card '+next;
+  card.querySelector('.badge').textContent = BADGES[next];
+  card.querySelector('.card-status').textContent = LABELS[next];
+  updateStat();
+}
+
+function markVisible(val) {
+  visible().forEach(s => statuts[s.id] = val);
+  renderGrid();
+}
+
+function updateStat() {
+  const vis = visible();
+  const nb  = { present:0, retard1:0, retard2:0, absent:0 };
+  vis.forEach(s => nb[getStatut(s.id)]++);
+  document.getElementById('stat-inline').innerHTML =
+    `<b style="color:#16a34a">${nb.present} présent·e·s</b> · ` +
+    `<b style="color:#f59e0b">${nb.retard1} ret.&lt;15</b> · ` +
+    `<b style="color:#ef4444">${nb.retard2} ret.&gt;15</b> · ` +
+    `<b style="color:#6b7280">${nb.absent} absent·e·s</b>` +
+    ` <span style="color:#aaa">/ ${vis.length}</span>`;
+  const present_total = nb.present + nb.retard1 + nb.retard2;
+  document.getElementById('tab-recap').textContent = `Récap (${present_total}/${vis.length})`;
+}
+
+// ─── RÉCAP ──────────────────────────────────────────────────
+function renderRecap() {
+  const vis = visible();
+  const groups = { present:[], retard1:[], retard2:[], absent:[], exclu:[] };
+  vis.forEach(s => groups[getStatut(s.id)].push(s));
+  const taux = vis.length ? Math.round((groups.present.length+groups.retard1.length+groups.retard2.length)/vis.length*100)+'%' : '—';
+  const label = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+
+  document.getElementById('stat-cards').innerHTML = [
+    [label,          vis.length,              '#1e3a5f'],
+    ['Présents',      groups.present.length,   '#16a34a'],
+    ['Retard < 15',   groups.retard1.length,   '#f59e0b'],
+    ['Retard > 15',   groups.retard2.length,   '#ef4444'],
+    ['Absents',       groups.absent.length,    '#6b7280'],
+    ['Exclus',        groups.exclu.length,     '#374151'],
+    ['Taux présence', taux,                    '#7c3aed'],
+  ].map(([l,v,c])=>`<div class="stat-card" style="border-top-color:${c}">
+    <div class="val" style="color:${c}">${v}</div><div class="lbl">${l}</div>
+  </div>`).join('');
+
+  const makeList = (id, list, cls, emoji, title) => {
+    document.getElementById(id).innerHTML = list.length ? `
+      <h3 style="margin-bottom:10px">${emoji} ${title} (${list.length})</h3>
+      <div class="chip-list">${list.map(s=>{
+        const idx=STUDENTS.findIndex(x=>x.id===s.id);
+        const [bg,fg]=getColor(idx);
+        const photo = PHOTOS[s.id];
+        const avt = photo
+          ? `<div class="chip-avatar" style="overflow:hidden"><img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`
+          : `<div class="chip-avatar" style="background:${bg};color:${fg}">${initials(s.prenom,s.nom)}</div>`;
+        return `<div class="chip ${cls}">${avt}${s.nom} ${s.prenom}
+          <span style="opacity:.6;font-size:10px">(TD${s.td}·TP${s.tp})</span></div>`;
+      }).join('')}</div>` : '';
+  };
+
+  makeList('list-absents',  groups.absent,  'chip-absent',  '❌', 'Absent·e·s');
+  makeList('list-retard2',  groups.retard2, 'chip-retard2', '⚠️', 'Retard > 15 min');
+  makeList('list-retard1',  groups.retard1, 'chip-retard1', '⏱️', 'Retard < 15 min');
+  makeList('list-exclus',   groups.exclu,   'chip-exclu',   '🚫', 'Exclu·e·s');
+  makeList('list-presents', groups.present, 'chip-present', '✓',  'Présent·e·s');
+}
+
+// ─── EXPORT EXCEL ───────────────────────────────────────────
+function exportXLSX() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const dateStr= date.split('-').reverse().join('/');
+  const label  = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+  const entete = [seance, heure ? `Début : ${heure}` : '', `${label}`, dateStr].filter(Boolean).join('  —  ');
+
+  const groups = { present:[], retard1:[], retard2:[], absent:[], exclu:[] };
+  vis.forEach(s => groups[getStatut(s.id)].push(s));
+
+  const wb = XLSX.utils.book_new();
+
+  // Feuille complète
+  const rows = [
+    [`Feuille de présence — BUT1 GCGP S2  —  ${entete}`],
+    [],
+    ['N° étudiant','Nom','Prénom','TD','TP','Statut','Aménagement'],
+    ...vis.map(s=>[s.id, s.nom, s.prenom, 'TD'+s.td, 'TP'+s.tp, LABELS[getStatut(s.id)], s.id==='24003879'?'1/3 temps':'']),
+
+    [],
+    [`Présents      : ${groups.present.length}`],
+    [`Retard < 15mn : ${groups.retard1.length}`],
+    [`Retard > 15mn : ${groups.retard2.length}`],
+    [`Absents       : ${groups.absent.length}`],
+    [`Total         : ${vis.length}`],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:14},{wch:24},{wch:18},{wch:6},{wch:6},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Présences');
+
+  // Feuille absents + retards
+  const wsA = XLSX.utils.aoa_to_sheet([
+    ['N° étudiant','Nom','Prénom','TD','TP','Statut'],
+    ...groups.absent.map(s=>[s.id,s.nom,s.prenom,'TD'+s.td,'TP'+s.tp,'Absent·e']),
+    ...groups.retard2.map(s=>[s.id,s.nom,s.prenom,'TD'+s.td,'TP'+s.tp,'Retard > 15 min']),
+    ...groups.retard1.map(s=>[s.id,s.nom,s.prenom,'TD'+s.td,'TP'+s.tp,'Retard < 15 min']),
+  ]);
+  wsA['!cols'] = [{wch:14},{wch:24},{wch:18},{wch:6},{wch:6},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, wsA, 'Absents & Retards');
+
+  XLSX.writeFile(wb, `appel_GCGP_${label}_${date}.xlsx`);
+}
+
+// ─── MAIL SECRÉTAIRE ────────────────────────────────────────
+function envoyerMail() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const dateStr= date.split('-').reverse().join('/');
+  const label  = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo complète';
+  const groups = { present:[], retard1:[], retard2:[], absent:[], exclu:[] };
+  vis.forEach(s => groups[getStatut(s.id)].push(s));
+
+  const fmt = arr => arr.length ? arr.map(s=>`  - ${s.nom} ${s.prenom} (TD${s.td}/TP${s.tp})`).join('\n') : '  (aucun)';
+
+  const lignesAbsents = groups.absent.length
+    ? `❌ ABSENTS (${groups.absent.length}) :\n${fmt(groups.absent)}`
+    : '';
+  const lignesRetard2 = groups.retard2.length
+    ? `⚠️ RETARDS > 15 min (${groups.retard2.length}) :\n${fmt(groups.retard2)}`
+    : '';
+  const lignesRetard1 = groups.retard1.length
+    ? `⏱️ RETARDS < 15 min (${groups.retard1.length}) :\n${fmt(groups.retard1)}`
+    : '';
+  const blocSignalements = [lignesAbsents, lignesRetard2, lignesRetard1]
+    .filter(Boolean).join('\n\n');
+
+  const corps =
+`Feuille de présence — BUT1 GCGP
+Cours   : ${seance}
+Groupe  : ${label}
+Date    : ${dateStr}  |  Début : ${heure || '—'}
+Présents : ${groups.present.length} / ${vis.length}
+
+${blocSignalements || '✓ Aucun absent ni retard.'}
+
+---
+Envoyé depuis l'application Feuille d'appel BUT1 GCGP`;
+
+  const sujet = `[Appel] ${seance} — ${label} — ${dateStr} ${heure ? heure : ''}`.trim();
+  const mailto = `mailto:fabien.girard@univ-amu.fr?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+  window.location.href = mailto;
+}
+
+// ─── BASE DE DONNÉES LOCALE ──────────────────────────────────
+const BDD_KEY = 'appel_gcgp_bdd';
+
+function getBDD() {
+  try { return JSON.parse(localStorage.getItem(BDD_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveBDD(data) {
+  localStorage.setItem(BDD_KEY, JSON.stringify(data));
+}
+
+function sauvegarderBDD() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const label  = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+
+  if (!seance || seance === 'Séance') { alert('Veuillez choisir un cours avant de sauvegarder.'); return; }
+  if (!heure) { alert('Veuillez choisir un horaire avant de sauvegarder.'); return; }
+
+  const bdd = getBDD();
+  // Supprimer une entrée identique si elle existe déjà (même cours/date/groupe/heure)
+  const key = `${date}_${heure}_${seance}_${label}`;
+  const filtered = bdd.filter(r => `${r.date}_${r.heure}_${r.cours}_${r.groupe}` !== key);
+
+  vis.forEach(s => {
+    filtered.push({
+      date, heure, cours: seance, groupe: label,
+      id: s.id, nom: s.nom, prenom: s.prenom,
+      td: s.td, tp: s.tp,
+      statut: LABELS[getStatut(s.id)],
+      ts: new Date().toISOString()
+    });
+  });
+
+  saveBDD(filtered);
+  // Feedback visuel
+  const btn = document.querySelector('.btn-save');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Sauvegardé !';
+  btn.style.background = '#16a34a';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = '#7c3aed'; }, 2000);
+}
+
+function renderBDD() {
+  const bdd = getBDD();
+  const tbody = document.getElementById('bdd-body');
+
+  if (bdd.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-bdd">Aucun appel enregistré pour l'instant.<br>Faites un appel puis cliquez sur 💾 Sauvegarder.</td></tr>`;
+    document.getElementById('bdd-stats').innerHTML = '';
+    return;
+  }
+
+  // Stats globales
+  const seances = new Set(bdd.map(r=>`${r.date}_${r.heure}_${r.cours}_${r.groupe}`)).size;
+  const absents = bdd.filter(r=>r.statut==='Absent·e').length;
+  const retards = bdd.filter(r=>r.statut.includes('Retard')).length;
+  document.getElementById('bdd-stats').innerHTML = `
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+      <div class="stat-card" style="border-top-color:#1e3a5f"><div class="val" style="color:#1e3a5f">${seances}</div><div class="lbl">Séances</div></div>
+      <div class="stat-card" style="border-top-color:#ef4444"><div class="val" style="color:#ef4444">${absents}</div><div class="lbl">Absences</div></div>
+      <div class="stat-card" style="border-top-color:#f59e0b"><div class="val" style="color:#f59e0b">${retards}</div><div class="lbl">Retards</div></div>
+      <div class="stat-card" style="border-top-color:#6b7280"><div class="val" style="color:#6b7280">${bdd.length}</div><div class="lbl">Entrées</div></div>
+    </div>`;
+
+  // Trier par date desc puis heure desc
+  const sorted = [...bdd].sort((a,b)=> b.date.localeCompare(a.date) || b.heure.localeCompare(a.heure));
+
+  const badgeClass = s => s==='Absent·e'?'badge-absent':s.includes('>15')?'badge-retard2':s.includes('<15')?'badge-retard1':'badge-present';
+
+  tbody.innerHTML = sorted.map(r=>`<tr>
+    <td>${r.date.split('-').reverse().join('/')}</td>
+    <td>${r.heure}</td>
+    <td>${r.cours}</td>
+    <td>${r.groupe}</td>
+    <td><b>${r.nom}</b></td>
+    <td>${r.prenom}</td>
+    <td style="color:#888;font-size:11px">${r.id}</td>
+    <td>TD${r.td}</td>
+    <td>TP${r.tp}</td>
+    <td><span class="${badgeClass(r.statut)}">${r.statut}</span></td>
+  </tr>`).join('');
+}
+
+function exportBDD() {
+  const bdd = getBDD();
+  if (!bdd.length) { alert('Aucune donnée à exporter.'); return; }
+
+  const wb = XLSX.utils.book_new();
+  const rows = [
+    ['Date','Heure','Cours','Groupe','Nom','Prénom','N° étudiant','TD','TP','Statut','Horodatage'],
+    ...bdd.sort((a,b)=>b.date.localeCompare(a.date)||b.heure.localeCompare(a.heure))
+      .map(r=>[r.date.split('-').reverse().join('/'), r.heure, r.cours, r.groupe,
+               r.nom, r.prenom, r.id, 'TD'+r.td, 'TP'+r.tp, r.statut, r.ts])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:7},{wch:28},{wch:10},{wch:22},{wch:16},{wch:12},{wch:6},{wch:6},{wch:18},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Historique');
+
+  // Feuille pivot absences par étudiant
+  const parEtudiant = {};
+  bdd.forEach(r => {
+    if (!parEtudiant[r.id]) parEtudiant[r.id] = {nom:r.nom, prenom:r.prenom, td:r.td, tp:r.tp, absences:0, retards:0, seances:new Set()};
+    parEtudiant[r.id].seances.add(`${r.date}_${r.heure}_${r.cours}`);
+    if (r.statut==='Absent·e') parEtudiant[r.id].absences++;
+    if (r.statut.includes('Retard')) parEtudiant[r.id].retards++;
+  });
+  const pivot = [['N° étudiant','Nom','Prénom','TD','TP','Séances','Absences','Retards']];
+  Object.entries(parEtudiant).sort((a,b)=>a[1].nom.localeCompare(b[1].nom)).forEach(([id,d])=>{
+    pivot.push([id, d.nom, d.prenom, 'TD'+d.td, 'TP'+d.tp, d.seances.size, d.absences, d.retards]);
+  });
+  const ws2 = XLSX.utils.aoa_to_sheet(pivot);
+  ws2['!cols'] = [{wch:12},{wch:22},{wch:16},{wch:6},{wch:6},{wch:8},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Par étudiant');
+
+  XLSX.writeFile(wb, `historique_appel_GCGP_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+function viderBDD() {
+  if (!window.confirm("Vider tout l’historique des appels ? Cette action est irréversible.")) return;
+  localStorage.removeItem(BDD_KEY);
+  const tbody = document.getElementById('bdd-body');
+  const stats = document.getElementById('bdd-stats');
+  if (tbody) tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:30px">Historique vidé.</td></tr>';
+  if (stats) stats.innerHTML = '';
+  updateStat();
+}
+
+
+// ─── VÉRIFICATION DOUBLON ────────────────────────────────────
+function verifierDoublon() {
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0,10);
+  const label  = filterTD!=='all' ? `TD${filterTD}` : filterTP!=='all' ? `TP${filterTP}` : 'Promo';
+  const msg    = document.getElementById('msg-correction');
+  if (!msg) return;
+
+  // Chercher dans le localStorage si un appel identique existe
+  const bdd = getBDD();
+  const key = `${date}_${heure}_${seance}_${label}`;
+  const existe = bdd.some(r => `${r.date}_${r.heure}_${r.cours}_${r.groupe}` === key);
+  msg.style.display = existe ? 'block' : 'none';
+}
+
+// ─── ONGLETS ────────────────────────────────────────────────
+function showTab(name) {
+  ['appel','recap','bdd'].forEach(p =>
+    document.getElementById('panel-'+p).classList.toggle('hidden', p!==name));
+  document.querySelectorAll('.tab').forEach((btn,i)=>{
+    btn.classList.toggle('active', ['appel','recap','bdd'][i]===name);
+  });
+  if (name==='recap') { renderRecap(); verifierDoublon(); }
+  if (name==='bdd')   renderBDD();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  if (checkAuth()) {
+    const auth = getAuth();
+    const hu = document.getElementById('header-user');
+    if (hu && auth) hu.textContent = auth.nom;
+    renderGrid();
+    initSemestre();
+    afficherAccueil();
+  } else {
+    showLoginModal();
+  }
+});
+</script>
+
+
+<!-- MODALE LOGIN -->
+<div id="modal-login" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:36px;max-width:400px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:44px;margin-bottom:8px">🔐</div>
+      <h2 style="font-size:20px;font-weight:800;color:#1e3a5f">Feuille d'appel</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:4px">IUT Marseille — BUT1 GCGP</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Mot de passe enseignant</label>
+      <input id="login-pwd" type="password" placeholder="Mot de passe"
+        onkeydown="if(event.key==='Enter') submitLogin()"
+        style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #d1d5db;font-size:14px;outline:none;font-family:monospace;letter-spacing:1px" />
+      <div id="login-err" style="display:none;margin-top:8px;font-size:12px;color:#ef4444;font-weight:600">
+        ❌ Mot de passe incorrect. Contactez Fabien Girard.
+      </div>
+    </div>
+    <button onclick="submitLogin()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#1e3a5f;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
+      Accéder à l'appli →
+    </button>
+    <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:14px">
+      Votre mot de passe vous a été communiqué par Fabien Girard
+    </p>
+  </div>
+</div>
+
+<!-- MODALE ACCUEIL -->
+<div id="modal-accueil" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:32px;max-width:480px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:8px">📋</div>
+      <h2 style="font-size:20px;font-weight:800;color:#1e3a5f">Feuille d'appel BUT1 GCGP</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:4px">IUT Marseille — 2026-2027</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0ea5e9">
+        <span style="font-size:22px">1️⃣</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#0c4a6e">Choisissez le cours et l'horaire</div>
+          <div style="font-size:12px;color:#555;margin-top:2px">Sélectionnez le semestre, la matière, l'heure de début et la date.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#f0fdf4;border-radius:10px;border-left:4px solid #22c55e">
+        <span style="font-size:22px">2️⃣</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#14532d">Filtrez le groupe</div>
+          <div style="font-size:12px;color:#555;margin-top:2px">Choisissez TDA, TDB ou TP1-4 selon votre cours.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#fefce8;border-radius:10px;border-left:4px solid #eab308">
+        <span style="font-size:22px">3️⃣</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#713f12">Faites l'appel</div>
+          <div style="font-size:12px;color:#555;margin-top:2px">Cliquez sur chaque étudiant pour changer son statut :<br>
+            <span style="color:#16a34a;font-weight:600">✓ Présent</span> →
+            <span style="color:#f59e0b;font-weight:600">⏱ Retard &lt;15</span> →
+            <span style="color:#ef4444;font-weight:600">⚠ Retard &gt;15</span> →
+            <span style="color:#9ca3af;font-weight:600">— Absent</span> → <span style="color:#6b7280;font-weight:600">🚫 Exclu·e</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#f5f3ff;border-radius:10px;border-left:4px solid #7c3aed">
+        <span style="font-size:22px">4️⃣</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:#4c1d95">Envoyez dans Récap</div>
+          <div style="font-size:12px;color:#555;margin-top:2px">Allez dans l'onglet <b>Récap</b> puis cliquez <b>✅ Enregistrer l'appel</b> pour transmettre les données.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="fermerAccueil(true)" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer">
+        Ne plus afficher
+      </button>
+      <button onclick="fermerAccueil(false)" style="flex:2;padding:12px;border-radius:10px;border:none;background:#1e3a5f;color:#fff;font-size:14px;font-weight:700;cursor:pointer">
+        C'est parti ! 🚀
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
