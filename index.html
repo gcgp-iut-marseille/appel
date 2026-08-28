@@ -481,6 +481,7 @@ async function envoyerAMUBox() {
   const duree = getDureeHeures(seance);
 
   const payload = {
+    type: 'appel',
     date, heure, semestre: sem, cours: seance, groupe: label,
     duree_heures: duree,
     pwd: getAuth()?.pwd || '',
