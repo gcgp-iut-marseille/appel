@@ -382,6 +382,11 @@ function initSemestre() {
 // ─── CONFIG GOOGLE SHEETS ────────────────────────────────────
 const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
 
+// gsheetsWrite définie ci-dessous (async)
+
+
+
+// ─── ENVOI GOOGLE SHEETS ─────────────────────────────────────
 async function gsheetsWrite(payload) {
   const resp = await fetch(GSHEETS_URL, {
     method: 'POST',
@@ -391,7 +396,6 @@ async function gsheetsWrite(payload) {
   const json = await resp.json();
   return json.status === 'ok';
 }
-
 
 // ─── DURÉES DES COURS ────────────────────────────────────────
 function getDureeHeures(seance) {
@@ -541,12 +545,14 @@ function getAuth() {
 
 function checkAuth() {
   const auth = getAuth();
-  if (auth && auth.pwd && auth.nom) {
-    // Déjà connecté (vérifié lors de la dernière session)
+  // Vérifier que la session a bien un pwd valide (format: XX-2627-xxxx)
+  if (auth && auth.pwd && auth.nom && /^[A-Z]{2}-2627-[a-z]{4}$/.test(auth.pwd)) {
     const inp = document.getElementById('inp-enseignant');
     if (inp && !inp.value) inp.value = auth.nom;
     return true;
   }
+  // Session invalide ou ancienne → effacer et redemander
+  localStorage.removeItem(AUTH_KEY);
   return false;
 }
 
