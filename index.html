@@ -729,7 +729,13 @@ async function envoyerAMUBox() {
     pwd: getAuth()?.pwd || '',
     enseignant,
     enregistre_le: new Date().toISOString(),
-    etudiants: vis.map(s => ({ id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)] }))
+    etudiants: (function() {
+      const nonPresents = vis.filter(s => getStatut(s.id) !== 'present')
+        .map(s => ({ id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)] }));
+      // Si tout le monde est présent, envoyer un marqueur
+      if (!nonPresents.length) return [{ id:'—', nom:'APPEL FAIT', prenom:'', td:'', tp:'', statut:'appel_fait', statut_label:'Tous présents ('+vis.length+')' }];
+      return nonPresents;
+    })()
   };
   const btn = document.getElementById('btn-amubox2') || document.getElementById('btn-amubox');
   if (btn) { btn.textContent = '⏳ Envoi…'; btn.disabled = true; }
