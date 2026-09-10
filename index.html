@@ -6,64 +6,72 @@
 <title>Appel — BUT1 GCGP 2026-2027</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
-#header { background:#1e3a5f;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px; }
-#header h1 { font-size:18px;font-weight:800; }
-#header p  { font-size:11px;opacity:.65;margin-top:2px; }
-.tab-bar { display:flex;gap:5px;flex-wrap:wrap; }
-.tab { padding:6px 13px;border-radius:8px;border:none;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:12px; }
-.tab.active { background:#fff;color:#1e3a5f; }
-#main { max-width:1100px;margin:0 auto;padding:16px 12px; }
-.top-row { display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center; }
-.top-row select,.top-row input { padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff; }
-.filter-bar { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center; }
-.filter-label { font-size:12px;font-weight:600;color:#6b7280; }
-.filt { padding:5px 12px;border-radius:16px;border:1.5px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#555; }
-.filt.active { background:#1e3a5f;color:#fff;border-color:#1e3a5f; }
-.sep { width:1px;height:20px;background:#e5e7eb;margin:0 4px; }
-.legend { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center; }
-.legend-item { display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280; }
-.legend-dot { width:10px;height:10px;border-radius:50%; }
-.action-bar { display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap; }
-.stat-text { font-size:13px;font-weight:700;color:#1e3a5f;flex:1; }
-.btn { padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:12px;color:#fff; }
-.btn-green{background:#16a34a;} .btn-gray{background:#6b7280;} .btn-blue{background:#1e3a5f;}
-.btn-export{background:#7c3aed;} .btn-mail{background:#0ea5e9;} .btn-save{background:#f59e0b;}
-.btn:hover{opacity:.85;} .btn:disabled{opacity:.4;cursor:not-allowed;}
-.grille { display:flex;flex-wrap:wrap;gap:10px; }
-.card { width:110px;background:#fff;border-radius:14px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;border:2px solid #e5e7eb;transition:transform .12s,box-shadow .12s;position:relative;user-select:none; }
-.card:hover { transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12); }
-.card.present{border-color:#22c55e;background:#f0fdf4;} .card.absent{border-color:#d1d5db;background:#f9fafb;}
-.card.retard1{border-color:#f59e0b;background:#fffbeb;} .card.retard2{border-color:#ef4444;background:#fff1f2;}
-.card.exclu{border-color:#6b7280;background:#f3f4f6;}
-.avatar-wrap { position:relative; }
-.avatar { width:72px;height:72px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800; }
-.avatar img { width:100%;height:100%;object-fit:cover; }
-.badge { position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#1e3a5f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:2px solid #fff; }
-.card.present .badge{background:#22c55e;} .card.absent .badge{background:#9ca3af;}
-.card.retard1 .badge{background:#f59e0b;} .card.retard2 .badge{background:#ef4444;}
-.card.exclu .badge{background:#6b7280;}
-.redoublante { position:absolute;top:-8px;right:-8px;background:#7c3aed;color:#fff;font-size:8px;font-weight:800;padding:2px 5px;border-radius:6px;white-space:nowrap;z-index:10;cursor:pointer; }
-.card-name{font-size:11px;font-weight:800;color:#111;text-align:center;line-height:1.2;}
-.card-prenom{font-size:10px;color:#6b7280;text-align:center;}
-.card-status{font-size:9px;font-weight:700;text-align:center;padding:2px 6px;border-radius:10px;}
-.card.present .card-status{background:#dcfce7;color:#16a34a;} .card.absent .card-status{background:#f3f4f6;color:#9ca3af;}
-.card.retard1 .card-status{background:#fef3c7;color:#d97706;} .card.retard2 .card-status{background:#fee2e2;color:#dc2626;}
-.card.exclu .card-status{background:#f3f4f6;color:#6b7280;}
-.stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
-.stat-card{background:#fff;border-radius:12px;padding:12px 16px;flex:1;min-width:80px;border-top:4px solid;}
-.stat-card .val{font-size:22px;font-weight:800;} .stat-card .lbl{font-size:11px;color:#666;}
-.list-group{margin-bottom:14px;} .list-group h3{font-size:13px;font-weight:700;margin-bottom:6px;}
-.list-item{background:#fff;border-radius:8px;padding:8px 12px;margin-bottom:4px;font-size:12px;display:flex;align-items:center;gap:8px;}
-.export-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
-.bdd-header{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
-.bdd-table-wrap{overflow-x:auto;}
-table.bdd{width:100%;border-collapse:collapse;font-size:12px;}
-table.bdd th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;white-space:nowrap;}
-table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
-.hidden{display:none;}
-@media(max-width:480px){.card{width:90px;}.avatar{width:60px;height:60px;font-size:18px;}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;min-height:100vh}
+#header{background:#1e3a5f;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+#header h1{font-size:18px;font-weight:800}
+#header p{font-size:11px;opacity:.65;margin-top:2px}
+.tab-bar{display:flex;gap:5px;flex-wrap:wrap}
+.tab{padding:6px 13px;border-radius:8px;border:none;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;font-weight:600;font-size:12px}
+.tab.active{background:#fff;color:#1e3a5f}
+#main{max-width:1100px;margin:0 auto;padding:16px 12px}
+.top-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.top-row select,.top-row input{padding:8px 12px;border-radius:8px;border:1.5px solid #d1d5db;font-size:13px;outline:none;background:#fff}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.filter-label{font-size:12px;font-weight:600;color:#6b7280}
+.filt{padding:5px 12px;border-radius:16px;border:1.5px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#555}
+.filt.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+.sep{width:1px;height:20px;background:#e5e7eb;margin:0 4px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#6b7280}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+.action-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.stat-text{font-size:13px;font-weight:700;color:#1e3a5f;flex:1}
+.btn{padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:12px;color:#fff}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.grille{display:flex;flex-wrap:wrap;gap:10px}
+.card{width:110px;background:#fff;border-radius:14px;padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;border:2px solid #e5e7eb;transition:transform .12s,box-shadow .12s;position:relative;user-select:none}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.card.present{border-color:#22c55e;background:#f0fdf4}
+.card.absent{border-color:#d1d5db;background:#f9fafb}
+.card.retard1{border-color:#f59e0b;background:#fffbeb}
+.card.retard2{border-color:#ef4444;background:#fff1f2}
+.card.exclu{border-color:#6b7280;background:#f3f4f6}
+.avatar-wrap{position:relative}
+.avatar{width:72px;height:72px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.badge{position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;border:2px solid #fff;background:#1e3a5f}
+.card.present .badge{background:#22c55e}
+.card.absent .badge{background:#9ca3af}
+.card.retard1 .badge{background:#f59e0b}
+.card.retard2 .badge{background:#ef4444}
+.card.exclu .badge{background:#6b7280}
+.redoublante{position:absolute;top:-8px;right:-8px;background:#7c3aed;color:#fff;font-size:8px;font-weight:800;padding:2px 5px;border-radius:6px;white-space:nowrap;z-index:10;cursor:pointer}
+.card-name{font-size:11px;font-weight:800;color:#111;text-align:center;line-height:1.2}
+.card-prenom{font-size:10px;color:#6b7280;text-align:center}
+.card-status{font-size:9px;font-weight:700;text-align:center;padding:2px 6px;border-radius:10px}
+.card.present .card-status{background:#dcfce7;color:#16a34a}
+.card.absent .card-status{background:#f3f4f6;color:#9ca3af}
+.card.retard1 .card-status{background:#fef3c7;color:#d97706}
+.card.retard2 .card-status{background:#fee2e2;color:#dc2626}
+.card.exclu .card-status{background:#f3f4f6;color:#6b7280}
+.stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:12px;padding:12px 16px;flex:1;min-width:80px;border-top:4px solid}
+.stat-card .val{font-size:22px;font-weight:800}
+.stat-card .lbl{font-size:11px;color:#666}
+.list-group{margin-bottom:14px}
+.list-group h3{font-size:13px;font-weight:700;margin-bottom:6px}
+.list-item{background:#fff;border-radius:8px;padding:8px 12px;margin-bottom:4px;font-size:12px;display:flex;align-items:center;gap:8px}
+.export-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.bdd-header{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.bdd-table-wrap{overflow-x:auto}
+table.bdd{width:100%;border-collapse:collapse;font-size:12px}
+table.bdd th{background:#1e3a5f;color:#fff;padding:8px 10px;text-align:left;white-space:nowrap}
+table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
+.hidden{display:none}
+.mode-correction{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;font-size:12px;color:#92400e;margin-bottom:10px;display:none}
+@media(max-width:480px){.card{width:90px}.avatar{width:60px;height:60px;font-size:18px}}
 </style>
 </head>
 <body>
@@ -78,30 +86,36 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
     <button onclick="logout()" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;cursor:pointer">⎋ Déco</button>
     <div class="tab-bar">
       <button class="tab active" onclick="showTab('appel')">Appel</button>
-      <button class="tab" id="tab-recap" onclick="showTab('recap')">Récap</button>
+      <button class="tab" onclick="showTab('recap')">Récap</button>
       <button class="tab" onclick="showTab('bdd')">📊 Historique</button>
     </div>
   </div>
 </div>
 
 <div id="main">
+
+  <!-- APPEL -->
   <div id="panel-appel">
     <div class="top-row">
       <select id="inp-semestre" onchange="updateMatieres()" style="min-width:80px">
         <option value="S1" selected>S1</option>
         <option value="S2">S2</option>
       </select>
-      <select id="inp-seance" style="flex:2;min-width:180px"><option value="">— Choisir un cours —</option></select>
-      <input id="inp-seance-custom" placeholder="Intitulé du cours…" style="display:none;flex:2;min-width:180px;border-color:#f59e0b" />
+      <select id="inp-seance" style="flex:2;min-width:180px">
+        <option value="">— Choisir un cours —</option>
+      </select>
+      <input id="inp-seance-custom" placeholder="Intitulé du cours…" style="display:none;flex:2;min-width:180px;border-color:#f59e0b"/>
       <select id="inp-heure" style="min-width:120px">
         <option value="">— Horaire —</option>
-        <option value="08:30">8h30</option><option value="10:30">10h30</option>
-        <option value="13:30">13h30</option><option value="15:30">15h30</option>
+        <option value="08:30">8h30</option>
+        <option value="10:30">10h30</option>
+        <option value="13:30">13h30</option>
+        <option value="15:30">15h30</option>
       </select>
-      <input id="inp-enseignant" placeholder="Votre nom" style="min-width:140px" />
-      <input id="inp-date" type="date" style="min-width:140px" />
+      <input id="inp-enseignant" placeholder="Votre nom" style="min-width:140px"/>
+      <input id="inp-date" type="date" style="min-width:140px"/>
     </div>
-    <div class="filter-bar" id="filter-tdtp">
+    <div class="filter-bar">
       <span class="filter-label">TD :</span>
       <button class="filt active" onclick="setFilter('td','all')">Tous</button>
       <button class="filt" onclick="setFilter('td','A')">TDA</button>
@@ -124,42 +138,49 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
     </div>
     <div class="action-bar">
       <span class="stat-text" id="stat-inline">—</span>
-      <button class="btn btn-green" onclick="markVisible('present')">✓ Tous présents</button>
-      <button class="btn btn-gray"  onclick="markVisible('absent')">✗ Effacer</button>
+      <button class="btn" style="background:#16a34a" onclick="markAll('present')">✓ Tous présents</button>
+      <button class="btn" style="background:#6b7280" onclick="markAll('absent')">✗ Effacer</button>
+    </div>
+    <div id="mode-correction-bar" class="mode-correction">
+      ⚠️ Mode correction — modifiez les statuts puis cliquez <b>✅ Enregistrer</b>
     </div>
     <div id="grille" class="grille"></div>
     <div style="margin-top:20px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button id="btn-amubox" onclick="showTab('recap');envoyerAMUBox()"
+      <button onclick="showTab('recap');envoyerAppel()"
         style="background:#16a34a;color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3)">
         ✅ Enregistrer l'appel
       </button>
-      <button id="btn-corriger-appel" onclick="ouvrirCorrection()"
+      <button onclick="chargerCorrection()"
         style="background:#f59e0b;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,.3)">
         🔄 Corriger
       </button>
     </div>
-    <div style="font-size:11px;color:#9ca3af;margin-top:8px;text-align:center">Enregistrer = 1er appel &nbsp;|&nbsp; Corriger = modification en cours de séance</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:8px;text-align:center">
+      Enregistrer = 1er appel &nbsp;|&nbsp; Corriger = charger le dernier appel pour modification
+    </div>
   </div>
 
+  <!-- RECAP -->
   <div id="panel-recap" class="hidden">
     <div class="stat-cards" id="stat-cards"></div>
-    <div id="list-absents"></div><div id="list-retard2"></div>
-    <div id="list-retard1"></div><div id="list-exclus"></div><div id="list-presents"></div>
-    <div id="msg-correction" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:10px">
-      ⚠️ Un appel existe déjà pour cette séance. Cliquer sur "Enregistrer" écrasera les données.
-    </div>
+    <div id="list-absents"></div>
+    <div id="list-retard2"></div>
+    <div id="list-retard1"></div>
+    <div id="list-exclus"></div>
+    <div id="list-presents"></div>
     <div class="export-btns">
-      <button class="btn btn-export" onclick="exportXLSX()">⬇️ Export Excel</button>
-      <button class="btn btn-mail"   onclick="envoyerMail()">✉️ Mail secrétariat</button>
-      <button class="btn btn-green"  id="btn-amubox2" onclick="envoyerAMUBox()" style="padding:10px 18px;font-size:13px">✅ Enregistrer</button>
-      <button class="btn btn-save"   onclick="sauvegarderBDD()">💾 Historique local</button>
+      <button class="btn" style="background:#7c3aed" onclick="exportXLSX()">⬇️ Export Excel</button>
+      <button class="btn" style="background:#0ea5e9" onclick="envoyerMail()">✉️ Mail secrétariat</button>
+      <button class="btn" style="background:#16a34a;padding:10px 18px;font-size:13px" onclick="envoyerAppel()">✅ Enregistrer</button>
+      <button class="btn" style="background:#f59e0b" onclick="sauvegarderBDD()">💾 Historique local</button>
     </div>
   </div>
 
+  <!-- HISTORIQUE -->
   <div id="panel-bdd" class="hidden">
     <div class="bdd-header">
       <h2 style="font-size:15px;font-weight:800;flex:1">📊 Historique des appels</h2>
-      <button class="btn btn-export" onclick="exportBDD()" style="padding:7px 13px;font-size:12px">⬇️ Excel</button>
+      <button class="btn" style="background:#7c3aed;padding:7px 13px;font-size:12px" onclick="exportBDD()">⬇️ Excel</button>
       <button class="btn" style="background:#ef4444;padding:7px 13px;font-size:12px" onclick="viderBDD()">🗑️ Vider</button>
     </div>
     <div id="bdd-stats" style="margin-bottom:12px;font-size:12px;color:#6b7280"></div>
@@ -173,6 +194,7 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
       </table>
     </div>
   </div>
+
 </div>
 
 <!-- MODALE LOGIN -->
@@ -183,13 +205,11 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
       <h2 style="font-size:20px;font-weight:800;color:#1e3a5f">Feuille d'appel</h2>
       <p style="font-size:13px;color:#6b7280;margin-top:4px">IUT Marseille — BUT1 GCGP 2026-2027</p>
     </div>
-    <div style="margin-bottom:16px">
-      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Mot de passe enseignant</label>
-      <input id="login-pwd" type="password" placeholder="Mot de passe"
-        onkeydown="if(event.key==='Enter') submitLogin()"
-        style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #d1d5db;font-size:14px;outline:none;font-family:monospace" />
-      <div id="login-err" style="display:none;margin-top:8px;font-size:12px;color:#ef4444;font-weight:600"></div>
-    </div>
+    <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Mot de passe enseignant</label>
+    <input id="login-pwd" type="password" placeholder="Mot de passe"
+      onkeydown="if(event.key==='Enter')submitLogin()"
+      style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #d1d5db;font-size:14px;outline:none;font-family:monospace;margin-bottom:10px"/>
+    <div id="login-err" style="display:none;margin-bottom:10px;font-size:12px;color:#ef4444;font-weight:600"></div>
     <button onclick="submitLogin()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#1e3a5f;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
       Accéder à l'appli →
     </button>
@@ -223,9 +243,9 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;font-size:13px;color:#444;line-height:1.6">
       <div style="padding:10px 14px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0ea5e9"><b>1.</b> Choisissez le <b>cours</b>, l'<b>horaire</b> et la <b>date</b></div>
-      <div style="padding:10px 14px;background:#fefce8;border-radius:10px;border-left:4px solid #eab308"><b>2.</b> Faites l'appel en cliquant sur les cartes (cycle : Présent → Absent → Retard…)</div>
-      <div style="padding:10px 14px;background:#f0fdf4;border-radius:10px;border-left:4px solid #22c55e"><b>3.</b> Cliquez <b>✅ Enregistrer l'appel</b> en bas de page</div>
-      <div style="padding:10px 14px;background:#fdf4ff;border-radius:10px;border-left:4px solid #a855f7"><b>4.</b> Pour une correction en cours de séance : <b>🔄 Corriger</b></div>
+      <div style="padding:10px 14px;background:#fefce8;border-radius:10px;border-left:4px solid #eab308"><b>2.</b> Faites l'appel en cliquant sur les cartes</div>
+      <div style="padding:10px 14px;background:#f0fdf4;border-radius:10px;border-left:4px solid #22c55e"><b>3.</b> Cliquez <b>✅ Enregistrer l'appel</b></div>
+      <div style="padding:10px 14px;background:#fdf4ff;border-radius:10px;border-left:4px solid #a855f7"><b>4.</b> Pour corriger en cours de séance : <b>🔄 Corriger</b></div>
     </div>
     <div style="display:flex;gap:10px">
       <button onclick="fermerAccueil(true)" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer">Ne plus afficher</button>
@@ -235,11 +255,17 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
 </div>
 
 <script>
-const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
-const BDD_KEY  = 'appel_gcgp_bdd';
-const AUTH_KEY = 'gcgp_auth';
-const ENCOURS_KEY = 'gcgp_appel_en_cours';
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════════
+const GSHEETS_URL  = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
+const BDD_KEY      = 'appel_gcgp_bdd';
+const AUTH_KEY     = 'gcgp_auth';
+const ENCOURS_KEY  = 'gcgp_appel_en_cours';
 
+// ═══════════════════════════════════════════════════════════
+// DONNÉES
+// ═══════════════════════════════════════════════════════════
 const PHOTOS = {};
 
 const STUDENTS = [
@@ -319,335 +345,524 @@ const MATIERES = {
   ]
 };
 
-// ─── AUTH ─────────────────────────────────────────────────────
-function getAuth(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null');}catch(e){return null;}}
-function checkAuth(){const a=getAuth();if(a&&a.pwd&&a.nom&&/^[A-Z]{2}-2627-[a-z]{4}$/.test(a.pwd)){const i=document.getElementById('inp-enseignant');if(i&&!i.value)i.value=a.nom;return true;}localStorage.removeItem(AUTH_KEY);return false;}
-async function login(pwd){try{const r=await fetch(GSHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({type:'auth',pwd})});const j=await r.json();if(j.status!=='ok')return false;localStorage.setItem(AUTH_KEY,JSON.stringify({pwd,nom:j.nom}));const i=document.getElementById('inp-enseignant');if(i)i.value=j.nom;return true;}catch(e){return false;}}
-async function submitLogin(){const pwd=document.getElementById('login-pwd').value.trim();const err=document.getElementById('login-err');const btn=document.querySelector('#modal-login button[onclick]');if(!pwd){err.textContent='⚠️ Veuillez saisir votre mot de passe.';err.style.display='block';return;}err.style.display='none';if(btn){btn.textContent='⏳ Vérification…';btn.disabled=true;}const ok=await login(pwd);if(ok){document.getElementById('modal-login').style.display='none';const a=getAuth();const hu=document.getElementById('header-user');if(hu&&a)hu.textContent=a.nom;renderGrid();initSemestre();afficherAccueil();}else{err.textContent='❌ Mot de passe incorrect. Contactez Fabien Girard.';err.style.display='block';document.getElementById('login-pwd').value='';document.getElementById('login-pwd').focus();if(btn){btn.textContent="Accéder à l'appli →";btn.disabled=false;}}}
-function logout(){localStorage.removeItem(AUTH_KEY);document.getElementById('modal-login').style.display='flex';}
+// ═══════════════════════════════════════════════════════════
+// ÉTAT DE L'APPLICATION
+// ═══════════════════════════════════════════════════════════
+const CYCLE  = ['present','absent','retard1','retard2','exclu'];
+const LABELS = {present:'Présent·e',absent:'Absent·e',retard1:'Retard < 15 min',retard2:'Retard > 15 min',exclu:'Exclu·e'};
+const BADGES = {present:'✓',absent:'—',retard1:'⏱',retard2:'⚠',exclu:'🚫'};
+const COLORS = [['#dbeafe','#1e40af'],['#dcfce7','#166534'],['#fef3c7','#92400e'],['#fce7f3','#9d174d'],['#ede9fe','#5b21b6'],['#ffedd5','#9a3412']];
 
-// ─── STATUTS ──────────────────────────────────────────────────
-const CYCLE=['present','absent','retard1','retard2','exclu'];
-const LABELS={present:'Présent·e',absent:'Absent·e',retard1:'Retard < 15 min',retard2:'Retard > 15 min',exclu:'Exclu·e'};
-const BADGES={present:'✓',absent:'—',retard1:'⏱',retard2:'⚠',exclu:'🚫'};
-const COLORS=[['#dbeafe','#1e40af'],['#dcfce7','#166534'],['#fef3c7','#92400e'],['#fce7f3','#9d174d'],['#ede9fe','#5b21b6'],['#ffedd5','#9a3412']];
-let statuts={},filterTD='all',filterTP='all';
-function getStatut(id){return statuts[id]||'present';}
-function getColor(i){return COLORS[i%COLORS.length];}
-function initials(pr,n){return (pr[0]||'')+(n[0]||'');}
+let statuts  = {};
+let filterTD = 'all';
+let filterTP = 'all';
+let modeCorrection = false;
 
-// ─── APPEL EN COURS (sauvegarde/restauration) ─────────────────
-function sauvegarderAppelEnCours(){
-  // Ne sauvegarder que si au moins un statut a été modifié
-  const hasChange = Object.values(statuts).some(s => s !== 'present');
-  if(!hasChange && Object.keys(statuts).length === 0) return;
-  const etat={
-    date:document.getElementById('inp-date').value,
-    heure:document.getElementById('inp-heure').value,
-    semestre:document.getElementById('inp-semestre').value,
-    seance:document.getElementById('inp-seance').value,
-    seanceCustom:document.getElementById('inp-seance-custom').value,
-    enseignant:document.getElementById('inp-enseignant').value,
-    filterTD,filterTP,statuts,ts:Date.now()
-  };
-  localStorage.setItem(ENCOURS_KEY,JSON.stringify(etat));
+// ═══════════════════════════════════════════════════════════
+// AUTHENTIFICATION
+// ═══════════════════════════════════════════════════════════
+function getAuth() {
+  try { return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null'); } catch(e) { return null; }
 }
-function restaurerAppelEnCours(){
-  try{
-    const raw=localStorage.getItem(ENCOURS_KEY);
-    if(!raw)return false;
-    const e=JSON.parse(raw);
-    if(Date.now()-e.ts>12*3600*1000)return false;
-    // D'abord le DOM (sans toucher aux statuts)
-    document.getElementById('inp-date').value=e.date||'';
-    document.getElementById('inp-heure').value=e.heure||'';
-    document.getElementById('inp-semestre').value=e.semestre||'S1';
-    updateMatieres();
-    if(e.seance)document.getElementById('inp-seance').value=e.seance;
-    if(e.seanceCustom){
-      document.getElementById('inp-seance-custom').value=e.seanceCustom;
-      document.getElementById('inp-seance-custom').style.display=e.seance==='__autre__'?'block':'none';
-    }
-    document.getElementById('inp-enseignant').value=e.enseignant||'';
-    filterTD=e.filterTD||'all';
-    filterTP=e.filterTP||'all';
-    // Restaurer les statuts EN DERNIER pour ne pas être écrasés
-    statuts = Object.assign({}, e.statuts||{});
+
+function checkAuth() {
+  const a = getAuth();
+  if (a && a.pwd && a.nom && /^[A-Z]{2}-2627-[a-z]{4}$/.test(a.pwd)) {
+    const i = document.getElementById('inp-enseignant');
+    if (i && !i.value) i.value = a.nom;
     return true;
-  }catch(err){console.error('restaurer:',err);return false;}
+  }
+  localStorage.removeItem(AUTH_KEY);
+  return false;
 }
 
-function effacerAppelEnCours(){localStorage.removeItem(ENCOURS_KEY);}
-
-// ─── MODALE REDOUBLANTE ───────────────────────────────────────
-function afficherMatieres(nom,matieres){
-  document.getElementById('modal-redoub-nom').textContent=nom;
-  document.getElementById('modal-redoub-liste').innerHTML=matieres.map(m=>`<li style="padding:5px 0;border-bottom:1px solid #f3f4f6">${m}</li>`).join('');
-  document.getElementById('modal-redoub').style.display='flex';
-}
-function fermerRedoub(){document.getElementById('modal-redoub').style.display='none';}
-
-// ─── AVATAR ───────────────────────────────────────────────────
-function avatarHTML(s,idx){
-  const photo=PHOTOS[s.id];const[bg,fg]=getColor(idx);
-  const inner=photo?`<img src="${photo}" style="width:100%;height:100%;object-fit:cover">`:`<span style="color:${fg}">${initials(s.prenom,s.nom)}</span>`;
-  const redoubBadge=s.redoublante?`<div class="redoublante" onclick="event.stopPropagation();afficherMatieres('${s.prenom} ${s.nom}',${JSON.stringify(s.matieres_s1||[])})">Redoubl.</div>`:'';
-  return `<div class="avatar-wrap">${redoubBadge}<div class="avatar" style="background:${bg}">${inner}</div><div class="badge">${BADGES[getStatut(s.id)]}</div></div>`;
+async function login(pwd) {
+  try {
+    const r = await fetch(GSHEETS_URL, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({type:'auth', pwd})});
+    const j = await r.json();
+    if (j.status !== 'ok') return false;
+    localStorage.setItem(AUTH_KEY, JSON.stringify({pwd, nom:j.nom}));
+    const i = document.getElementById('inp-enseignant');
+    if (i) i.value = j.nom;
+    return true;
+  } catch(e) { return false; }
 }
 
-// ─── GRILLE ───────────────────────────────────────────────────
-function visible(){
-  return STUDENTS.filter(s=>(filterTD==='all'||s.td===filterTD)&&(filterTP==='all'||s.tp===filterTP))
-    .sort((a,b)=>a.nom.localeCompare(b.nom));
+async function submitLogin() {
+  const pwd = document.getElementById('login-pwd').value.trim();
+  const err = document.getElementById('login-err');
+  const btn = document.querySelector('#modal-login button[onclick]');
+  if (!pwd) { err.textContent = '⚠️ Veuillez saisir votre mot de passe.'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  if (btn) { btn.textContent = '⏳ Vérification…'; btn.disabled = true; }
+  const ok = await login(pwd);
+  if (ok) {
+    document.getElementById('modal-login').style.display = 'none';
+    const a = getAuth();
+    const hu = document.getElementById('header-user');
+    if (hu && a) hu.textContent = a.nom;
+    initApp();
+  } else {
+    err.textContent = '❌ Mot de passe incorrect. Contactez Fabien Girard.';
+    err.style.display = 'block';
+    document.getElementById('login-pwd').value = '';
+    document.getElementById('login-pwd').focus();
+    if (btn) { btn.textContent = "Accéder à l'appli →"; btn.disabled = false; }
+  }
 }
-function renderGrid(){
-  const vis=visible();
-  document.getElementById('grille').innerHTML=vis.map((s,i)=>{
-    const st=getStatut(s.id);
+
+function logout() {
+  localStorage.removeItem(AUTH_KEY);
+  document.getElementById('modal-login').style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAUVEGARDE APPEL EN COURS
+// ═══════════════════════════════════════════════════════════
+function sauvegarder() {
+  // Ne sauvegarder que si au moins un statut modifié
+  const hasChange = Object.values(statuts).some(s => s !== 'present');
+  if (!hasChange) return;
+  const etat = {
+    date:       document.getElementById('inp-date').value,
+    heure:      document.getElementById('inp-heure').value,
+    semestre:   document.getElementById('inp-semestre').value,
+    seance:     document.getElementById('inp-seance').value,
+    seanceCustom: document.getElementById('inp-seance-custom').value,
+    enseignant: document.getElementById('inp-enseignant').value,
+    filterTD, filterTP,
+    statuts: JSON.parse(JSON.stringify(statuts)),
+    ts: Date.now()
+  };
+  localStorage.setItem(ENCOURS_KEY, JSON.stringify(etat));
+}
+
+function chargerCorrection() {
+  try {
+    const raw = localStorage.getItem(ENCOURS_KEY);
+    if (!raw) { alert("Aucun appel sauvegard\u00e9. Faites d'abord un appel avec Enregistrer."); return; }
+    const e = JSON.parse(raw);
+    if (Date.now() - e.ts > 12 * 3600 * 1000) { alert("L'appel sauvegard\u00e9 est trop ancien (> 12h)."); return; }
+
+    // Restaurer le DOM
+    document.getElementById('inp-date').value      = e.date || '';
+    document.getElementById('inp-heure').value     = e.heure || '';
+    document.getElementById('inp-semestre').value  = e.semestre || 'S1';
+    updateMatieres();
+    setTimeout(() => {
+      // Restaurer les matières après updateMatieres()
+      if (e.seance) document.getElementById('inp-seance').value = e.seance;
+      if (e.seanceCustom) {
+        document.getElementById('inp-seance-custom').value = e.seanceCustom;
+        document.getElementById('inp-seance-custom').style.display = e.seance === '__autre__' ? 'block' : 'none';
+      }
+      document.getElementById('inp-enseignant').value = e.enseignant || '';
+
+      // Restaurer les filtres
+      filterTD = e.filterTD || 'all';
+      filterTP = e.filterTP || 'all';
+      updateFiltresBtns();
+
+      // Restaurer les statuts EN DERNIER
+      statuts = JSON.parse(JSON.stringify(e.statuts || {}));
+
+      // Mode correction
+      modeCorrection = true;
+      document.getElementById('mode-correction-bar').style.display = 'block';
+
+      renderGrid();
+    }, 50);
+  } catch(err) {
+    console.error(err);
+    alert("Erreur lors de la restauration.");
+  }
+}
+
+function effacerSauvegarde() {
+  localStorage.removeItem(ENCOURS_KEY);
+}
+
+// ═══════════════════════════════════════════════════════════
+// GRILLE ET STATUTS
+// ═══════════════════════════════════════════════════════════
+function getStatut(id) { return statuts[id] || 'present'; }
+function getColor(i)   { return COLORS[i % COLORS.length]; }
+function initials(pr, n) { return (pr[0] || '') + (n[0] || ''); }
+
+function visible() {
+  return STUDENTS
+    .filter(s => (filterTD === 'all' || s.td === filterTD) && (filterTP === 'all' || s.tp === filterTP))
+    .sort((a, b) => a.nom.localeCompare(b.nom));
+}
+
+function renderGrid() {
+  const vis = visible();
+  document.getElementById('grille').innerHTML = vis.map((s, i) => {
+    const st = getStatut(s.id);
+    const [bg, fg] = getColor(i);
+    const photo = PHOTOS[s.id];
+    const inner = photo
+      ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover">`
+      : `<span style="color:${fg}">${initials(s.prenom, s.nom)}</span>`;
+    const redoubBadge = s.redoublante
+      ? `<div class="redoublante" onclick="event.stopPropagation();afficherMatieres('${s.prenom} ${s.nom}',${JSON.stringify(s.matieres_s1||[])})">Redoubl.</div>`
+      : '';
     return `<div class="card ${st}" onclick="toggle('${s.id}')" id="card-${s.id}">
-      ${avatarHTML(s,i)}
-      <div style="text-align:center"><div class="card-name">${s.nom}</div><div class="card-prenom">${s.prenom}</div></div>
+      <div class="avatar-wrap">
+        ${redoubBadge}
+        <div class="avatar" style="background:${bg}">${inner}</div>
+        <div class="badge">${BADGES[st]}</div>
+      </div>
+      <div style="text-align:center">
+        <div class="card-name">${s.nom}</div>
+        <div class="card-prenom">${s.prenom}</div>
+      </div>
       <div class="card-status">${LABELS[st]}</div>
     </div>`;
   }).join('');
   updateStat();
 }
-function toggle(id){
-  const cur=getStatut(id);const next=CYCLE[(CYCLE.indexOf(cur)+1)%CYCLE.length];
-  statuts[id]=next;
-  const card=document.getElementById('card-'+id);if(!card)return;
-  CYCLE.forEach(c=>card.classList.toggle(c,c===next));
-  card.querySelector('.badge').textContent=BADGES[next];
-  card.querySelector('.card-status').textContent=LABELS[next];
-  updateStat();sauvegarderAppelEnCours();
+
+function toggle(id) {
+  const cur  = getStatut(id);
+  const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+  statuts[id] = next;
+  const card = document.getElementById('card-' + id);
+  if (!card) return;
+  CYCLE.forEach(c => card.classList.toggle(c, c === next));
+  card.querySelector('.badge').textContent = BADGES[next];
+  card.querySelector('.card-status').textContent = LABELS[next];
+  updateStat();
+  sauvegarder();
 }
-function markVisible(s){visible().forEach(e=>{statuts[e.id]=s;});renderGrid();sauvegarderAppelEnCours();}
-function setFilter(type,val){
-  if(type==='td'){filterTD=val;filterTP='all';}else{filterTP=val;filterTD='all';}
+
+function markAll(s) {
+  visible().forEach(e => { statuts[e.id] = s; });
+  renderGrid();
+  sauvegarder();
+}
+
+function updateStat() {
+  const vis = visible();
+  const nb = vis.filter(s => getStatut(s.id) !== 'present').length;
+  document.getElementById('stat-inline').textContent = `${vis.length - nb} présent·e·s / ${vis.length}`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// FILTRES
+// ═══════════════════════════════════════════════════════════
+const TD_MAP = {Tous:'all', TDA:'A', TDB:'B'};
+const TP_MAP = {Tous:'all', TP1:'1', TP2:'2', TP3:'3', TP4:'4'};
+
+function setFilter(type, val) {
+  if (type === 'td') { filterTD = val; filterTP = 'all'; }
+  else               { filterTP = val; filterTD = 'all'; }
   updateFiltresBtns();
   renderGrid();
 }
 
-function updateFiltresBtns(){
-  const tdMap={'Tous':'all','TDA':'A','TDB':'B'};
-  const tpMap={'Tous':'all','TP1':'1','TP2':'2','TP3':'3','TP4':'4'};
-  document.querySelectorAll('.filter-bar .filt').forEach(b=>{
-    const txt=b.textContent.trim();
-    if(txt in tdMap) b.classList.toggle('active', tdMap[txt]===filterTD);
-    else if(txt in tpMap) b.classList.toggle('active', tpMap[txt]===filterTP);
+function updateFiltresBtns() {
+  document.querySelectorAll('.filter-bar .filt').forEach(b => {
+    const txt = b.textContent.trim();
+    if (txt in TD_MAP) b.classList.toggle('active', TD_MAP[txt] === filterTD);
+    if (txt in TP_MAP) b.classList.toggle('active', TP_MAP[txt] === filterTP);
   });
-}
-function updateStat(){
-  const vis=visible();const nb=vis.filter(s=>getStatut(s.id)!=='present').length;
-  document.getElementById('stat-inline').textContent=`${vis.length-nb} présent·e·s / ${vis.length}`;
 }
 
-// ─── MATIÈRES ─────────────────────────────────────────────────
-function updateMatieres(){
-  const sem=document.getElementById('inp-semestre').value;
-  const sel=document.getElementById('inp-seance');
-  sel.innerHTML='<option value="">— Choisir un cours —</option>';
-  (MATIERES[sem]||[]).forEach(cat=>{
-    const grp=document.createElement('optgroup');grp.label=cat.groupe;
-    cat.items.forEach(m=>{const opt=document.createElement('option');opt.value=m;opt.textContent=m;grp.appendChild(opt);});
+// ═══════════════════════════════════════════════════════════
+// MATIÈRES
+// ═══════════════════════════════════════════════════════════
+function updateMatieres() {
+  const sem = document.getElementById('inp-semestre').value;
+  const sel = document.getElementById('inp-seance');
+  sel.innerHTML = '<option value="">— Choisir un cours —</option>';
+  (MATIERES[sem] || []).forEach(cat => {
+    const grp = document.createElement('optgroup');
+    grp.label = cat.groupe;
+    cat.items.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      grp.appendChild(opt);
+    });
     sel.appendChild(grp);
   });
-  const a=document.createElement('option');a.value='__autre__';a.textContent='✏️ Autre (saisir manuellement)';sel.appendChild(a);
+  const a = document.createElement('option');
+  a.value = '__autre__'; a.textContent = '✏️ Autre (saisir manuellement)';
+  sel.appendChild(a);
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('inp-seance').addEventListener('change',function(){
-    const c=document.getElementById('inp-seance-custom');
-    c.style.display=this.value==='__autre__'?'block':'none';
-    if(this.value!=='__autre__')c.value='';
-  });
-});
-function getSeanceLabel(){const s=document.getElementById('inp-seance').value;return s==='__autre__'?document.getElementById('inp-seance-custom').value.trim():s;}
-function getHeureLabel(){return document.getElementById('inp-heure').value;}
-function getDureeHeures(s){if(!s)return 2;const sl=s.toLowerCase();if(sl.includes('tp procédés')||sl.includes('tp procedes'))return 8;if(sl.includes('tp'))return 4;return 2;}
-function initSemestre(){
-  const m=new Date().getMonth()+1;
-  document.getElementById('inp-semestre').value=(m>=9||m<=1)?'S1':'S2';
+
+function getSeanceLabel() {
+  const v = document.getElementById('inp-seance').value;
+  return v === '__autre__' ? document.getElementById('inp-seance-custom').value.trim() : v;
+}
+
+function getHeureLabel() { return document.getElementById('inp-heure').value; }
+
+function getDuree(seance) {
+  if (!seance) return 2;
+  const s = seance.toLowerCase();
+  if (s.includes('tp procédés') || s.includes('tp procedes')) return 8;
+  if (s.includes('tp')) return 4;
+  return 2;
+}
+
+function initSemestre() {
+  const m = new Date().getMonth() + 1;
+  document.getElementById('inp-semestre').value = (m >= 9 || m <= 1) ? 'S1' : 'S2';
   updateMatieres();
 }
 
-// ─── RECAP ────────────────────────────────────────────────────
-function renderRecap(){
-  const vis=visible();
-  const abs=vis.filter(s=>getStatut(s.id)==='absent');
-  const r2=vis.filter(s=>getStatut(s.id)==='retard2');
-  const r1=vis.filter(s=>getStatut(s.id)==='retard1');
-  const ex=vis.filter(s=>getStatut(s.id)==='exclu');
-  const pr=vis.filter(s=>getStatut(s.id)==='present');
-  document.getElementById('stat-cards').innerHTML=[['#22c55e',pr.length,'Présent·e·s'],['#ef4444',abs.length,'Absent·e·s'],['#f59e0b',r1.length,'Retard <15'],['#dc2626',r2.length,'Retard >15'],['#6b7280',ex.length,'Exclu·e·s']].map(([c,v,l])=>`<div class="stat-card" style="border-top-color:${c}"><div class="val">${v}</div><div class="lbl">${l}</div></div>`).join('');
-  const rl=(t,a,c)=>{if(!a.length)return '';return `<div class="list-group"><h3 style="color:${c}">${t} (${a.length})</h3>${a.map(s=>`<div class="list-item"><span>👤</span><b>${s.nom}</b> ${s.prenom}</div>`).join('')}</div>`;};
-  document.getElementById('list-absents').innerHTML=rl('Absent·e·s',abs,'#ef4444');
-  document.getElementById('list-retard2').innerHTML=rl('Retard > 15',r2,'#dc2626');
-  document.getElementById('list-retard1').innerHTML=rl('Retard < 15',r1,'#f59e0b');
-  document.getElementById('list-exclus').innerHTML=rl('Exclu·e·s',ex,'#6b7280');
-  document.getElementById('list-presents').innerHTML=rl('Présent·e·s',pr,'#22c55e');
+// ═══════════════════════════════════════════════════════════
+// ENVOI GOOGLE SHEETS
+// ═══════════════════════════════════════════════════════════
+async function gsheetsPost(payload) {
+  const r = await fetch(GSHEETS_URL, {method:'POST', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload)});
+  const j = await r.json();
+  return j.status === 'ok';
 }
 
-// ─── BDD LOCALE ───────────────────────────────────────────────
-function getBDD(){return JSON.parse(localStorage.getItem(BDD_KEY)||'[]');}
-function saveBDD(d){localStorage.setItem(BDD_KEY,JSON.stringify(d));}
-function sauvegarderBDD(){
-  const vis=visible();const seance=getSeanceLabel();const heure=getHeureLabel();
-  const sem=document.getElementById('inp-semestre').value;
-  const date=document.getElementById('inp-date').value||new Date().toISOString().slice(0,10);
-  const label=filterTD!=='all'?`TD${filterTD}`:filterTP!=='all'?`TP${filterTP}`:'Promo';
-  const ens=document.getElementById('inp-enseignant').value||getAuth()?.nom||'';
-  const duree=getDureeHeures(seance);const bdd=getBDD();
-  vis.forEach(s=>bdd.push({date,heure,semestre:sem,cours:seance,groupe:label,duree_heures:duree,enseignant:ens,id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:getStatut(s.id),statut_label:LABELS[getStatut(s.id)]}));
-  saveBDD(bdd);renderBDD();alert('✅ Sauvegardé localement !');
-}
-function renderBDD(){
-  const bdd=getBDD();
-  document.getElementById('bdd-stats').textContent=`${bdd.length} enregistrements`;
-  document.getElementById('bdd-body').innerHTML=bdd.slice(-200).reverse().map(r=>`<tr><td>${r.date}</td><td>${r.heure}</td><td>${r.cours}</td><td>${r.groupe}</td><td>${r.nom}</td><td>${r.prenom}</td><td>${r.id}</td><td>${r.statut_label}</td></tr>`).join('');
-}
-function viderBDD(){if(confirm('Vider tout l\'historique local ?')){saveBDD([]);renderBDD();}}
+async function envoyerAppel() {
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  if (!seance) { alert('Veuillez choisir un cours.'); return; }
+  if (!heure)  { alert('Veuillez choisir un horaire.'); return; }
 
-// ─── ENVOI GOOGLE SHEETS ──────────────────────────────────────
-async function gsheetsWrite(payload){
-  const r=await fetch(GSHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
-  const j=await r.json();return j.status==='ok';
-}
-function verifierDoublon(){
-  const seance=getSeanceLabel();const heure=getHeureLabel();
-  const date=document.getElementById('inp-date').value;
-  const label=filterTD!=='all'?`TD${filterTD}`:filterTP!=='all'?`TP${filterTP}`:'Promo';
-  const existe=getBDD().some(r=>r.date===date&&r.heure===heure&&r.cours===seance&&r.groupe===label);
-  document.getElementById('msg-correction').style.display=existe?'block':'none';
-}
-async function envoyerAMUBox(){
-  const seance=getSeanceLabel();const heure=getHeureLabel();
-  if(!seance){alert('Veuillez choisir un cours.');return;}
-  if(!heure){alert('Veuillez choisir un horaire.');return;}
-  const vis=visible();const sem=document.getElementById('inp-semestre').value;
-  const date=document.getElementById('inp-date').value||new Date().toISOString().slice(0,10);
-  const label=filterTD!=='all'?`TD${filterTD}`:filterTP!=='all'?`TP${filterTP}`:'Promo';
-  const duree=getDureeHeures(seance);
-  const ens=document.getElementById('inp-enseignant').value||getAuth()?.nom||'';
-  const nonPresents=vis.filter(s=>getStatut(s.id)!=='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:getStatut(s.id),statut_label:LABELS[getStatut(s.id)]}));
-  const presents=vis.filter(s=>getStatut(s.id)==='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:'a_supprimer',statut_label:''}));
-  // Si correction : envoyer non-présents + présents (pour suppression lignes)
-  // Si premier appel : envoyer non-présents uniquement (ou marqueur si tous présents)
-  const bddActuelle=getBDD();
-  const estCorrection=bddActuelle.some(r=>r.date===date&&r.heure===heure&&r.cours===seance&&r.groupe===label);
+  const vis    = visible();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0, 10);
+  const sem    = document.getElementById('inp-semestre').value;
+  const label  = filterTD !== 'all' ? `TD${filterTD}` : filterTP !== 'all' ? `TP${filterTP}` : 'Promo';
+  const duree  = getDuree(seance);
+  const ens    = document.getElementById('inp-enseignant').value || getAuth()?.nom || '';
+  const pwd    = getAuth()?.pwd || '';
+
+  // Détecter si correction (appel déjà dans la BDD locale)
+  const bdd = getBDD();
+  const estCorrection = bdd.some(r => r.date === date && r.heure === heure && r.cours === seance && r.groupe === label);
+
+  // Construire la liste des étudiants à envoyer
+  const nonPresents = vis.filter(s => getStatut(s.id) !== 'present')
+    .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)]}));
+
   let etudiants;
-  if(estCorrection){
-    etudiants=[...nonPresents,...presents];
-  }else{
-    etudiants=nonPresents.length?nonPresents:[{id:'—',nom:'APPEL FAIT',prenom:'',td:'',tp:'',statut:'appel_fait',statut_label:`Tous présents (${vis.length})`}];
+  if (estCorrection) {
+    // Mode correction : envoyer non-présents + présents (pour suppression)
+    const presents = vis.filter(s => getStatut(s.id) === 'present')
+      .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:'a_supprimer', statut_label:''}));
+    etudiants = [...nonPresents, ...presents];
+  } else {
+    // Premier appel : non-présents ou marqueur si tous présents
+    etudiants = nonPresents.length ? nonPresents
+      : [{id:'—', nom:'APPEL FAIT', prenom:'', td:'', tp:'', statut:'appel_fait', statut_label:`Tous présents (${vis.length})`}];
   }
-  const payload={type:estCorrection?'correction':'appel',date,heure,semestre:sem,cours:seance,groupe:label,duree_heures:duree,pwd:getAuth()?.pwd||'',enseignant:ens,enregistre_le:new Date().toISOString(),etudiants};
-  const btns=[document.getElementById('btn-amubox'),document.getElementById('btn-amubox2')];
-  btns.forEach(b=>{if(b){b.textContent='⏳ Envoi…';b.disabled=true;}});
-  try{
-    const ok=await gsheetsWrite(payload);
-    if(ok){btns.forEach(b=>{if(b){b.textContent='✅ Envoyé !';b.style.background='#16a34a';}});sauvegarderBDD();effacerAppelEnCours();}
-    else throw new Error('Réponse inattendue');
-  }catch(e){
-    btns.forEach(b=>{if(b){b.textContent='❌ Échec';b.style.background='#ef4444';}});
+
+  const payload = {
+    type: estCorrection ? 'correction' : 'appel',
+    date, heure, semestre: sem, cours: seance, groupe: label,
+    duree_heures: duree, pwd, enseignant: ens,
+    enregistre_le: new Date().toISOString(),
+    etudiants
+  };
+
+  // UI
+  const btns = document.querySelectorAll('[onclick*="envoyerAppel"]');
+  btns.forEach(b => { b.textContent = '⏳ Envoi…'; b.disabled = true; });
+
+  try {
+    const ok = await gsheetsPost(payload);
+    if (ok) {
+      btns.forEach(b => { b.textContent = '✅ Envoyé !'; b.style.background = '#16a34a'; });
+      // Sauvegarder en BDD locale et effacer la sauvegarde en cours
+      sauvegarderBDD();
+      effacerSauvegarde();
+      // Quitter le mode correction
+      modeCorrection = false;
+      document.getElementById('mode-correction-bar').style.display = 'none';
+    } else { throw new Error('Réponse inattendue'); }
+  } catch(e) {
+    btns.forEach(b => { b.textContent = '❌ Échec'; b.style.background = '#ef4444'; });
     sauvegarderBDD();
-    if(confirm('Envoi échoué. Envoyer par mail ?'))envoyerMail();
+    if (confirm('Envoi échoué. Envoyer par mail ?')) envoyerMail();
     else alert('Données sauvegardées localement.');
   }
-  setTimeout(()=>{btns.forEach(b=>{if(b){b.textContent=b.id==='btn-amubox'?"✅ Enregistrer l'appel":'✅ Enregistrer';b.style.background='';b.disabled=false;}});renderGrid();},2000);
-}
 
-// ─── CORRECTION ───────────────────────────────────────────────
-function ouvrirCorrection(){
-  const ok=restaurerAppelEnCours();
-  if(ok){
-    renderGrid();
-    document.querySelectorAll('.filter-bar .filt').forEach(b=>{
-      const txt=b.textContent.trim();
-      if(['Tous','TDA','TDB'].includes(txt))b.classList.toggle('active',(txt==='Tous'?'all':txt.replace('TD',''))===filterTD);
-      if(['Tous','TP1','TP2','TP3','TP4'].includes(txt))b.classList.toggle('active',(txt==='Tous'?'all':txt.replace('TP',''))===filterTP);
+  setTimeout(() => {
+    btns.forEach(b => {
+      b.textContent = b.closest('#panel-recap') ? '✅ Enregistrer' : "✅ Enregistrer l'appel";
+      b.style.background = '';
+      b.disabled = false;
     });
-    alert("✅ Dernier appel restauré\nModifiez les statuts puis cliquez 'Corriger l'appel' dans le Récap.");
-  }else{
-    alert("Aucun appel en cours.\nFaites d'abord un appel avec 'Enregistrer'.");
-  }
-}
-async function envoyerCorrection(){
-  const seance=getSeanceLabel();const heure=getHeureLabel();
-  if(!seance){alert('Veuillez choisir un cours.');return;}
-  if(!heure){alert('Veuillez choisir un horaire.');return;}
-  const vis=visible();const sem=document.getElementById('inp-semestre').value;
-  const date=document.getElementById('inp-date').value||new Date().toISOString().slice(0,10);
-  const label=filterTD!=='all'?`TD${filterTD}`:filterTP!=='all'?`TP${filterTP}`:'Promo';
-  const ens=document.getElementById('inp-enseignant').value||getAuth()?.nom||'';
-  const nonPresents=vis.filter(s=>getStatut(s.id)!=='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:getStatut(s.id),statut_label:LABELS[getStatut(s.id)]}));
-  const presents=vis.filter(s=>getStatut(s.id)==='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:'a_supprimer',statut_label:''}));
-  const payload={type:'correction',date,heure,semestre:sem,cours:seance,groupe:label,duree_heures:getDureeHeures(seance),pwd:getAuth()?.pwd||'',enseignant:ens,etudiants:[...nonPresents,...presents]};
-  const btns=[document.getElementById('btn-correction'),document.getElementById('btn-corriger-appel')];
-  btns.forEach(b=>{if(b){b.textContent='⏳…';b.disabled=true;}});
-  try{
-    const ok=await gsheetsWrite(payload);
-    if(ok){btns.forEach(b=>{if(b){b.textContent='✅ Corrigé !';b.style.background='#16a34a';}});}
-    else throw new Error('Réponse inattendue');
-  }catch(e){btns.forEach(b=>{if(b){b.textContent='❌ Échec';b.style.background='#ef4444';}});alert('Correction impossible.');}
-  setTimeout(()=>{btns.forEach(b=>{if(b){b.textContent=b.id==='btn-corriger-appel'?'🔄 Corriger':"🔄 Corriger l'appel";b.style.background='';b.disabled=false;}});},2000);
+    renderGrid();
+  }, 2000);
 }
 
-function envoyerMail(){
-  const vis=visible();const seance=getSeanceLabel();const heure=getHeureLabel();
-  const date=document.getElementById('inp-date').value;
-  const ens=document.getElementById('inp-enseignant').value||getAuth()?.nom||'';
-  const abs=vis.filter(s=>getStatut(s.id)!=='present');
-  const corps=`Appel BUT1 GCGP\nDate: ${date} | Heure: ${heure} | Cours: ${seance}\nEnseignant: ${ens}\n\nNon présents:\n${abs.map(s=>`- ${s.nom} ${s.prenom} (${LABELS[getStatut(s.id)]})`).join('\n')||'Aucun'}`;
-  window.location.href=`mailto:fabien.girard@univ-amu.fr?subject=Appel ${seance} ${date}&body=${encodeURIComponent(corps)}`;
+function envoyerMail() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const date   = document.getElementById('inp-date').value;
+  const heure  = getHeureLabel();
+  const ens    = document.getElementById('inp-enseignant').value || getAuth()?.nom || '';
+  const abs    = vis.filter(s => getStatut(s.id) !== 'present');
+  const corps  = `Appel BUT1 GCGP\nDate: ${date} | Heure: ${heure} | Cours: ${seance}\nEnseignant: ${ens}\n\nNon présents:\n${abs.map(s => `- ${s.nom} ${s.prenom} (${LABELS[getStatut(s.id)]})`).join('\n') || 'Aucun'}`;
+  window.location.href = `mailto:fabien.girard@univ-amu.fr?subject=Appel ${seance} ${date}&body=${encodeURIComponent(corps)}`;
 }
 
-// ─── EXPORT EXCEL ─────────────────────────────────────────────
-function exportXLSX(){
-  const vis=visible();const seance=getSeanceLabel();const date=document.getElementById('inp-date').value;const heure=getHeureLabel();
-  const sem=document.getElementById('inp-semestre').value;const label=filterTD!=='all'?`TD${filterTD}`:filterTP!=='all'?`TP${filterTP}`:'Promo';
-  const ens=document.getElementById('inp-enseignant').value||'';
-  const wb=XLSX.utils.book_new();
-  const rows=[['Date','Heure','Cours','Groupe','Durée','Enseignant','N° étudiant','Nom','Prénom','TD','TP','Statut','Statut label'],...vis.map(s=>[date,heure,seance,label,getDureeHeures(seance),ens,s.id,s.nom,s.prenom,s.td,s.tp,getStatut(s.id),LABELS[getStatut(s.id)]])];
-  const ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Appel');
-  XLSX.writeFile(wb,`appel_${seance}_${date}.xlsx`);
-}
-function exportBDD(){
-  const bdd=getBDD();const wb=XLSX.utils.book_new();
-  const rows=[['Date','Heure','Cours','Groupe','Durée','Enseignant','N°','Nom','Prénom','TD','TP','Statut','Statut label'],...bdd.map(r=>[r.date,r.heure,r.cours,r.groupe,r.duree_heures,r.enseignant,r.id,r.nom,r.prenom,r.td,r.tp,r.statut,r.statut_label])];
-  const ws=XLSX.utils.aoa_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Historique');
-  XLSX.writeFile(wb,`historique_appel_${new Date().toISOString().slice(0,10)}.xlsx`);
-}
+// ═══════════════════════════════════════════════════════════
+// BDD LOCALE
+// ═══════════════════════════════════════════════════════════
+function getBDD()      { return JSON.parse(localStorage.getItem(BDD_KEY) || '[]'); }
+function saveBDD(d)    { localStorage.setItem(BDD_KEY, JSON.stringify(d)); }
 
-// ─── ONGLETS ──────────────────────────────────────────────────
-function showTab(name){
-  ['appel','recap','bdd'].forEach(p=>document.getElementById('panel-'+p).classList.toggle('hidden',p!==name));
-  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['appel','recap','bdd'][i]===name));
-  if(name==='recap'){renderRecap();verifierDoublon();}
-  if(name==='bdd')renderBDD();
+function sauvegarderBDD() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const heure  = getHeureLabel();
+  const date   = document.getElementById('inp-date').value || new Date().toISOString().slice(0, 10);
+  const sem    = document.getElementById('inp-semestre').value;
+  const label  = filterTD !== 'all' ? `TD${filterTD}` : filterTP !== 'all' ? `TP${filterTP}` : 'Promo';
+  const ens    = document.getElementById('inp-enseignant').value || getAuth()?.nom || '';
+  const duree  = getDuree(seance);
+  const bdd    = getBDD();
+  vis.forEach(s => bdd.push({date, heure, semestre:sem, cours:seance, groupe:label, duree_heures:duree, enseignant:ens, id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)]}));
+  saveBDD(bdd);
+  renderBDD();
 }
 
-// ─── MODALE ACCUEIL ───────────────────────────────────────────
-function afficherAccueil(){if(!localStorage.getItem('gcgp_accueil_masque'))document.getElementById('modal-accueil').style.display='flex';}
-function fermerAccueil(n){if(n)localStorage.setItem('gcgp_accueil_masque','1');document.getElementById('modal-accueil').style.display='none';}
+function renderBDD() {
+  const bdd = getBDD();
+  document.getElementById('bdd-stats').textContent = `${bdd.length} enregistrements`;
+  document.getElementById('bdd-body').innerHTML = bdd.slice(-200).reverse()
+    .map(r => `<tr><td>${r.date}</td><td>${r.heure}</td><td>${r.cours}</td><td>${r.groupe}</td><td>${r.nom}</td><td>${r.prenom}</td><td>${r.id}</td><td>${r.statut_label}</td></tr>`)
+    .join('');
+}
 
-// ─── INIT ─────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('inp-date').value=new Date().toISOString().slice(0,10);
-  (function(){
-    const now=new Date();const h=now.getHours()*60+now.getMinutes();
-    const slots=[{v:'08:30',m:510},{v:'10:30',m:630},{v:'13:30',m:810},{v:'15:30',m:930}];
-    const cl=slots.reduce((a,b)=>Math.abs(b.m-h)<Math.abs(a.m-h)?b:a);
-    if(Math.abs(cl.m-h)<90)document.getElementById('inp-heure').value=cl.v;
-  })();
-  if(checkAuth()){
-    const a=getAuth();const hu=document.getElementById('header-user');
-    if(hu&&a)hu.textContent=a.nom;
-    renderGrid();initSemestre();afficherAccueil();
-  }else{
-    document.getElementById('modal-login').style.display='flex';
+function viderBDD() {
+  if (confirm("Vider tout l'historique local ?")) { saveBDD([]); renderBDD(); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// RECAP
+// ═══════════════════════════════════════════════════════════
+function renderRecap() {
+  const vis = visible();
+  const abs = vis.filter(s => getStatut(s.id) === 'absent');
+  const r2  = vis.filter(s => getStatut(s.id) === 'retard2');
+  const r1  = vis.filter(s => getStatut(s.id) === 'retard1');
+  const ex  = vis.filter(s => getStatut(s.id) === 'exclu');
+  const pr  = vis.filter(s => getStatut(s.id) === 'present');
+  document.getElementById('stat-cards').innerHTML = [
+    ['#22c55e', pr.length,  'Présent·e·s'],
+    ['#ef4444', abs.length, 'Absent·e·s'],
+    ['#f59e0b', r1.length,  'Retard <15'],
+    ['#dc2626', r2.length,  'Retard >15'],
+    ['#6b7280', ex.length,  'Exclu·e·s'],
+  ].map(([c,v,l]) => `<div class="stat-card" style="border-top-color:${c}"><div class="val">${v}</div><div class="lbl">${l}</div></div>`).join('');
+  const rl = (t, a, c) => {
+    if (!a.length) return '';
+    return `<div class="list-group"><h3 style="color:${c}">${t} (${a.length})</h3>${a.map(s => `<div class="list-item"><span>👤</span><b>${s.nom}</b> ${s.prenom}</div>`).join('')}</div>`;
+  };
+  document.getElementById('list-absents').innerHTML  = rl('Absent·e·s',  abs, '#ef4444');
+  document.getElementById('list-retard2').innerHTML  = rl('Retard > 15', r2,  '#dc2626');
+  document.getElementById('list-retard1').innerHTML  = rl('Retard < 15', r1,  '#f59e0b');
+  document.getElementById('list-exclus').innerHTML   = rl('Exclu·e·s',   ex,  '#6b7280');
+  document.getElementById('list-presents').innerHTML = rl('Présent·e·s', pr,  '#22c55e');
+}
+
+// ═══════════════════════════════════════════════════════════
+// EXPORT EXCEL
+// ═══════════════════════════════════════════════════════════
+function exportXLSX() {
+  const vis    = visible();
+  const seance = getSeanceLabel();
+  const date   = document.getElementById('inp-date').value;
+  const heure  = getHeureLabel();
+  const sem    = document.getElementById('inp-semestre').value;
+  const label  = filterTD !== 'all' ? `TD${filterTD}` : filterTP !== 'all' ? `TP${filterTP}` : 'Promo';
+  const ens    = document.getElementById('inp-enseignant').value || '';
+  const wb = XLSX.utils.book_new();
+  const rows = [
+    ['Date','Heure','Cours','Groupe','Durée','Enseignant','N° étudiant','Nom','Prénom','TD','TP','Statut','Statut label'],
+    ...vis.map(s => [date,heure,seance,label,getDuree(seance),ens,s.id,s.nom,s.prenom,s.td,s.tp,getStatut(s.id),LABELS[getStatut(s.id)]])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Appel');
+  XLSX.writeFile(wb, `appel_${seance}_${date}.xlsx`);
+}
+
+function exportBDD() {
+  const bdd = getBDD();
+  const wb  = XLSX.utils.book_new();
+  const rows = [
+    ['Date','Heure','Cours','Groupe','Durée','Enseignant','N°','Nom','Prénom','TD','TP','Statut','Statut label'],
+    ...bdd.map(r => [r.date,r.heure,r.cours,r.groupe,r.duree_heures,r.enseignant,r.id,r.nom,r.prenom,r.td,r.tp,r.statut,r.statut_label])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Historique');
+  XLSX.writeFile(wb, `historique_appel_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ONGLETS
+// ═══════════════════════════════════════════════════════════
+function showTab(name) {
+  ['appel','recap','bdd'].forEach(p => document.getElementById('panel-' + p).classList.toggle('hidden', p !== name));
+  document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', ['appel','recap','bdd'][i] === name));
+  if (name === 'recap') renderRecap();
+  if (name === 'bdd')   renderBDD();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALES
+// ═══════════════════════════════════════════════════════════
+function afficherMatieres(nom, matieres) {
+  document.getElementById('modal-redoub-nom').textContent = nom;
+  document.getElementById('modal-redoub-liste').innerHTML = matieres.map(m => `<li style="padding:5px 0;border-bottom:1px solid #f3f4f6">${m}</li>`).join('');
+  document.getElementById('modal-redoub').style.display = 'flex';
+}
+function fermerRedoub() { document.getElementById('modal-redoub').style.display = 'none'; }
+function afficherAccueil() {
+  if (!localStorage.getItem('gcgp_accueil_masque'))
+    document.getElementById('modal-accueil').style.display = 'flex';
+}
+function fermerAccueil(n) {
+  if (n) localStorage.setItem('gcgp_accueil_masque', '1');
+  document.getElementById('modal-accueil').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// INITIALISATION
+// ═══════════════════════════════════════════════════════════
+function initApp() {
+  // Date du jour
+  document.getElementById('inp-date').value = new Date().toISOString().slice(0, 10);
+  // Horaire le plus proche
+  const now = new Date();
+  const h   = now.getHours() * 60 + now.getMinutes();
+  const slots = [{v:'08:30',m:510},{v:'10:30',m:630},{v:'13:30',m:810},{v:'15:30',m:930}];
+  const cl = slots.reduce((a, b) => Math.abs(b.m - h) < Math.abs(a.m - h) ? b : a);
+  if (Math.abs(cl.m - h) < 90) document.getElementById('inp-heure').value = cl.v;
+  // Semestre
+  initSemestre();
+  // Listener cours
+  document.getElementById('inp-seance').addEventListener('change', function() {
+    const c = document.getElementById('inp-seance-custom');
+    c.style.display = this.value === '__autre__' ? 'block' : 'none';
+    if (this.value !== '__autre__') c.value = '';
+  });
+  // Grille
+  renderGrid();
+  afficherAccueil();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (checkAuth()) {
+    const a  = getAuth();
+    const hu = document.getElementById('header-user');
+    if (hu && a) hu.textContent = a.nom;
+    initApp();
+  } else {
+    document.getElementById('modal-login').style.display = 'flex';
   }
 });
-
 </script>
 </body>
 </html>
