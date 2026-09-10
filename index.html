@@ -339,6 +339,9 @@ function initials(pr,n){return (pr[0]||'')+(n[0]||'');}
 
 // ─── APPEL EN COURS (sauvegarde/restauration) ─────────────────
 function sauvegarderAppelEnCours(){
+  // Ne sauvegarder que si au moins un statut a été modifié
+  const hasChange = Object.values(statuts).some(s => s !== 'present');
+  if(!hasChange && Object.keys(statuts).length === 0) return;
   const etat={
     date:document.getElementById('inp-date').value,
     heure:document.getElementById('inp-heure').value,
@@ -415,12 +418,18 @@ function toggle(id){
 function markVisible(s){visible().forEach(e=>{statuts[e.id]=s;});renderGrid();sauvegarderAppelEnCours();}
 function setFilter(type,val){
   if(type==='td'){filterTD=val;filterTP='all';}else{filterTP=val;filterTD='all';}
+  updateFiltresBtns();
+  renderGrid();
+}
+
+function updateFiltresBtns(){
+  const tdMap={'Tous':'all','TDA':'A','TDB':'B'};
+  const tpMap={'Tous':'all','TP1':'1','TP2':'2','TP3':'3','TP4':'4'};
   document.querySelectorAll('.filter-bar .filt').forEach(b=>{
     const txt=b.textContent.trim();
-    if(['Tous','TDA','TDB'].includes(txt))b.classList.toggle('active',(txt==='Tous'?'all':txt.replace('TD',''))===filterTD);
-    if(['Tous','TP1','TP2','TP3','TP4'].includes(txt))b.classList.toggle('active',(txt==='Tous'?'all':txt.replace('TP',''))===filterTP);
+    if(txt in tdMap) b.classList.toggle('active', tdMap[txt]===filterTD);
+    else if(txt in tpMap) b.classList.toggle('active', tpMap[txt]===filterTP);
   });
-  renderGrid();
 }
 function updateStat(){
   const vis=visible();const nb=vis.filter(s=>getStatut(s.id)!=='present').length;
