@@ -444,34 +444,36 @@ function chargerCorrection() {
     const e = JSON.parse(raw);
     if (Date.now() - e.ts > 12 * 3600 * 1000) { alert("L'appel sauvegard\u00e9 est trop ancien (> 12h)."); return; }
 
+    // Sauvegarder les statuts dans une variable locale AVANT tout update DOM
+    const statutsSauvegardes = JSON.parse(JSON.stringify(e.statuts || {}));
+
     // Restaurer le DOM
-    document.getElementById('inp-date').value      = e.date || '';
-    document.getElementById('inp-heure').value     = e.heure || '';
-    document.getElementById('inp-semestre').value  = e.semestre || 'S1';
+    document.getElementById('inp-date').value     = e.date || '';
+    document.getElementById('inp-heure').value    = e.heure || '';
+    document.getElementById('inp-semestre').value = e.semestre || 'S1';
     updateMatieres();
-    setTimeout(() => {
-      // Restaurer les matières après updateMatieres()
-      if (e.seance) document.getElementById('inp-seance').value = e.seance;
-      if (e.seanceCustom) {
-        document.getElementById('inp-seance-custom').value = e.seanceCustom;
-        document.getElementById('inp-seance-custom').style.display = e.seance === '__autre__' ? 'block' : 'none';
-      }
-      document.getElementById('inp-enseignant').value = e.enseignant || '';
+    if (e.seance) document.getElementById('inp-seance').value = e.seance;
+    if (e.seanceCustom) {
+      document.getElementById('inp-seance-custom').value = e.seanceCustom;
+      document.getElementById('inp-seance-custom').style.display = e.seance === '__autre__' ? 'block' : 'none';
+    }
+    document.getElementById('inp-enseignant').value = e.enseignant || '';
 
-      // Restaurer les filtres
-      filterTD = e.filterTD || 'all';
-      filterTP = e.filterTP || 'all';
-      updateFiltresBtns();
+    // Restaurer les filtres
+    filterTD = e.filterTD || 'all';
+    filterTP = e.filterTP || 'all';
+    updateFiltresBtns();
 
-      // Restaurer les statuts EN DERNIER
-      statuts = JSON.parse(JSON.stringify(e.statuts || {}));
+    // Réappliquer les statuts APRES tout le DOM — pas de setTimeout
+    statuts = statutsSauvegardes;
 
-      // Mode correction
-      modeCorrection = true;
-      document.getElementById('mode-correction-bar').style.display = 'block';
+    // Mode correction
+    modeCorrection = true;
+    document.getElementById('mode-correction-bar').style.display = 'block';
 
-      renderGrid();
-    }, 50);
+    // renderGrid utilise statuts tel qu'il est maintenant
+    renderGrid();
+
   } catch(err) {
     console.error(err);
     alert("Erreur lors de la restauration.");
