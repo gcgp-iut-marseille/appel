@@ -152,7 +152,6 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
       <button class="btn btn-export" onclick="exportXLSX()">⬇️ Export Excel</button>
       <button class="btn btn-mail"   onclick="envoyerMail()">✉️ Mail secrétariat</button>
       <button class="btn btn-green"  id="btn-amubox2" onclick="envoyerAMUBox()" style="padding:10px 18px;font-size:13px">✅ Enregistrer</button>
-      <button class="btn btn-save"   id="btn-correction" onclick="envoyerCorrection()" style="background:#f59e0b">🔄 Corriger l'appel</button>
       <button class="btn btn-save"   onclick="sauvegarderBDD()">💾 Historique local</button>
     </div>
   </div>
@@ -236,6 +235,8 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6;}
 </div>
 
 <script>
+const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
+con
 const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
 const BDD_KEY  = 'appel_gcgp_bdd';
 const AUTH_KEY = 'gcgp_auth';
@@ -530,8 +531,18 @@ async function envoyerAMUBox(){
   const duree=getDureeHeures(seance);
   const ens=document.getElementById('inp-enseignant').value||getAuth()?.nom||'';
   const nonPresents=vis.filter(s=>getStatut(s.id)!=='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:getStatut(s.id),statut_label:LABELS[getStatut(s.id)]}));
-  const etudiants=nonPresents.length?nonPresents:[{id:'—',nom:'APPEL FAIT',prenom:'',td:'',tp:'',statut:'appel_fait',statut_label:`Tous présents (${vis.length})`}];
-  const payload={type:'appel',date,heure,semestre:sem,cours:seance,groupe:label,duree_heures:duree,pwd:getAuth()?.pwd||'',enseignant:ens,enregistre_le:new Date().toISOString(),etudiants};
+  const presents=vis.filter(s=>getStatut(s.id)==='present').map(s=>({id:s.id,nom:s.nom,prenom:s.prenom,td:s.td,tp:s.tp,statut:'a_supprimer',statut_label:''}));
+  // Si correction : envoyer non-présents + présents (pour suppression lignes)
+  // Si premier appel : envoyer non-présents uniquement (ou marqueur si tous présents)
+  const bddActuelle=getBDD();
+  const estCorrection=bddActuelle.some(r=>r.date===date&&r.heure===heure&&r.cours===seance&&r.groupe===label);
+  let etudiants;
+  if(estCorrection){
+    etudiants=[...nonPresents,...presents];
+  }else{
+    etudiants=nonPresents.length?nonPresents:[{id:'—',nom:'APPEL FAIT',prenom:'',td:'',tp:'',statut:'appel_fait',statut_label:`Tous présents (${vis.length})`}];
+  }
+  const payload={type:estCorrection?'correction':'appel',date,heure,semestre:sem,cours:seance,groupe:label,duree_heures:duree,pwd:getAuth()?.pwd||'',enseignant:ens,enregistre_le:new Date().toISOString(),etudiants};
   const btns=[document.getElementById('btn-amubox'),document.getElementById('btn-amubox2')];
   btns.forEach(b=>{if(b){b.textContent='⏳ Envoi…';b.disabled=true;}});
   try{
@@ -638,6 +649,3 @@ document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('modal-login').style.display='flex';
   }
 });
-</script>
-</body>
-</html>
