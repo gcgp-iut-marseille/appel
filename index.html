@@ -359,18 +359,25 @@ function restaurerAppelEnCours(){
     if(!raw)return false;
     const e=JSON.parse(raw);
     if(Date.now()-e.ts>12*3600*1000)return false;
+    // D'abord le DOM (sans toucher aux statuts)
     document.getElementById('inp-date').value=e.date||'';
     document.getElementById('inp-heure').value=e.heure||'';
     document.getElementById('inp-semestre').value=e.semestre||'S1';
     updateMatieres();
     if(e.seance)document.getElementById('inp-seance').value=e.seance;
-    if(e.seanceCustom){document.getElementById('inp-seance-custom').value=e.seanceCustom;document.getElementById('inp-seance-custom').style.display=e.seance==='__autre__'?'block':'none';}
+    if(e.seanceCustom){
+      document.getElementById('inp-seance-custom').value=e.seanceCustom;
+      document.getElementById('inp-seance-custom').style.display=e.seance==='__autre__'?'block':'none';
+    }
     document.getElementById('inp-enseignant').value=e.enseignant||'';
-    filterTD=e.filterTD||'all';filterTP=e.filterTP||'all';
-    statuts=e.statuts||{};
+    filterTD=e.filterTD||'all';
+    filterTP=e.filterTP||'all';
+    // Restaurer les statuts EN DERNIER pour ne pas être écrasés
+    statuts = Object.assign({}, e.statuts||{});
     return true;
-  }catch(e){return false;}
+  }catch(err){console.error('restaurer:',err);return false;}
 }
+
 function effacerAppelEnCours(){localStorage.removeItem(ENCOURS_KEY);}
 
 // ─── MODALE REDOUBLANTE ───────────────────────────────────────
