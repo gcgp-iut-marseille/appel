@@ -675,7 +675,7 @@ async function envoyerAppel() {
       btns.forEach(b => { b.textContent = '✅ Envoyé !'; b.style.background = '#16a34a'; });
       // Sauvegarder en BDD locale et effacer la sauvegarde en cours
       sauvegarderBDD();
-      effacerSauvegarde();
+      // On garde la sauvegarde pour permettre les corrections
       // Quitter le mode correction
       modeCorrection = false;
       document.getElementById('mode-correction-bar').style.display = 'none';
