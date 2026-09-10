@@ -214,7 +214,324 @@ table.bdd td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
         style="background:#16a34a;color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3)">
         ✅ Enregistrer l'appel
       </button>
-      <button id="btn-corriger-appel" onclick="envoyerCorrection()"
+      <button id="btn-corriger-appel" onclick="ouvrirCorrection()"
+        style="background:#f59e0b;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,.3)">
+        🔄 Corriger
+      </button>
+      <div style="font-size:11px;color:#9ca3af;margin-top:6px">Enregistrer = 1er appel &nbsp;|&nbsp; Corriger = modification en cours de séance</div>
+    </div>
+  </div>
+
+  <!-- RECAP -->
+  <div id="panel-recap" class="hidden">
+    <div class="stat-cards" id="stat-cards"></div>
+    <div id="list-absents"></div>
+    <div id="list-retard2"></div>
+    <div id="list-retard1"></div>
+    <div id="list-exclus"></div>
+    <div id="list-presents"></div>
+    <div id="msg-correction" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:10px">
+      ⚠️ Un appel existe déjà pour cette séance. Cliquer sur "Enregistrer" écrasera les données.
+    </div>
+    <div class="export-btns">
+      <button class="btn btn-export" onclick="exportXLSX()">⬇️ Export Excel</button>
+      <button class="btn btn-mail"   onclick="envoyerMail()">✉️ Mail secrétariat</button>
+      <button class="btn btn-green"  id="btn-amubox2" onclick="envoyerAMUBox()" style="padding:10px 18px;font-size:13px">✅ Enregistrer</button>
+      <button class="btn btn-orange" id="btn-correction" onclick="envoyerCorrection()" style="padding:10px 18px;font-size:13px">🔄 Corriger l'appel</button>
+      <button class="btn btn-save"   onclick="sauvegarderBDD()">💾 Historique local</button>
+    </div>
+  </div>
+
+  <!-- HISTORIQUE -->
+  <div id="panel-bdd" class="hidden">
+    <div class="bdd-header">
+      <h2 style="font-size:15px;font-weight:800;flex:1">📊 Historique des appels</h2>
+      <button class="btn btn-export" onclick="exportBDD()" style="padding:7px 13px;font-size:12px">⬇️ Excel</button>
+      <button class="btn" style="background:#ef4444;padding:7px 13px;font-size:12px" onclick="viderBDD()">🗑️ Vider</button>
+    </div>
+    <div id="bdd-stats" style="margin-bottom:12px;font-size:12px;color:#6b7280"></div>
+    <div class="bdd-table-wrap">
+      <table class="bdd">
+        <thead><tr>
+          <th>Date</th><th>Heure</th><th>Cours</th><th>Groupe</th>
+          <th>Nom</th><th>Prénom</th><th>N° étudiant</th><th>Statut</th>
+        </tr></thead>
+        <tbody id="bdd-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALE LOGIN -->
+<div id="modal-login" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:300;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:36px;max-width:400px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:44px;margin-bottom:8px">🔐</div>
+      <h2 style="font-size:20px;font-weight:800;color:#1e3a5f">Feuille d'appel</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:4px">IUT Marseille — BUT1 GCGP 2026-2027</p>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px">Mot de passe enseignant</label>
+      <input id="login-pwd" type="password" placeholder="Mot de passe"
+        onkeydown="if(event.key==='Enter') submitLogin()"
+        style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #d1d5db;font-size:14px;outline:none;font-family:monospace;letter-spacing:1px" />
+      <div id="login-err" style="display:none;margin-top:8px;font-size:12px;color:#ef4444;font-weight:600"></div>
+    </div>
+    <button onclick="submitLogin()" style="width:100%;padding:13px;border-radius:10px;border:none;background:#1e3a5f;color:#fff;font-size:15px;font-weight:700;cursor:pointer">
+      Accéder à l'appli →
+    </button>
+    <p style="font-size:11px;color:#9ca3af;text-align:center;margin-top:14px">Mot de passe communiqué par Fabien Girard</p>
+  </div>
+</div>
+
+<!-- MODALE REDOUBLANTE -->
+<div id="modal-redoub" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.2)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px">Redoublante</div>
+        <div id="modal-redoub-nom" style="font-size:16px;font-weight:800;color:#1e3a5f"></div>
+      </div>
+      <button onclick="fermerRedoub()" style="background:none;border:none;cursor:pointer;font-size:22px;color:#9ca3af">✕</button>
+    </div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:10px;font-weight:600">Matières suivies ce semestre :</div>
+    <ul id="modal-redoub-liste" style="list-style:none;font-size:13px;color:#374151;padding:0"></ul>
+    <button onclick="fermerRedoub()" style="margin-top:16px;width:100%;padding:10px;border-radius:10px;border:none;background:#7c3aed;color:#fff;font-weight:700;font-size:13px;cursor:pointer">Fermer</button>
+  </div>
+</div>
+
+<!-- MODALE ACCUEIL -->
+<div id="modal-accueil" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:32px;max-width:460px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:8px">📋</div>
+      <h2 style="font-size:20px;font-weight:800;color:#1e3a5f">Feuille d'appel BUT1 GCGP</h2>
+      <p style="font-size:13px;color:#6b7280;margin-top:4px">IUT Marseille — 2026-2027</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;font-size:13px;color:#444;line-height:1.6">
+      <div style="padding:10px 14px;background:#f0f9ff;border-radius:10px;border-left:4px solid #0ea5e9"><b>1.</b> Choisissez le <b>cours</b>, l'<b>horaire</b> et la <b>date</b></div>
+      <div style="padding:10px 14px;background:#fefce8;border-radius:10px;border-left:4px solid #eab308"><b>2.</b> Faites l'appel en cliquant sur les cartes (cycle : Présent → Absent → Retard…)</div>
+      <div style="padding:10px 14px;background:#f0fdf4;border-radius:10px;border-left:4px solid #22c55e"><b>3.</b> Cliquez <b>✅ Enregistrer l'appel</b> en bas de page</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button onclick="fermerAccueil(true)" style="flex:1;padding:12px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer">Ne plus afficher</button>
+      <button onclick="fermerAccueil(false)" style="flex:2;padding:12px;border-radius:10px;border:none;background:#1e3a5f;color:#fff;font-size:14px;font-weight:700;cursor:pointer">C'est parti ! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<script></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+#header {
+  background: #1e3a5f; color: #fff;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+}
+#header h1 { font-size: 18px; font-weight: 800; }
+#header p  { font-size: 11px; opacity: .65; margin-top: 2px; }
+.tab-bar { display: flex; gap: 5px; flex-wrap: wrap; }
+.tab { padding: 6px 13px; border-radius: 8px; border: none; cursor: pointer; background: rgba(255,255,255,.15); color: #fff; font-weight: 600; font-size: 12px; }
+.tab.active { background: #fff; color: #1e3a5f; }
+
+#main { max-width: 1100px; margin: 0 auto; padding: 16px 12px; }
+
+.top-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.top-row select, .top-row input { padding: 8px 12px; border-radius: 8px; border: 1.5px solid #d1d5db; font-size: 13px; outline: none; background: #fff; }
+
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+.filter-label { font-size: 12px; font-weight: 600; color: #6b7280; }
+.filt { padding: 5px 12px; border-radius: 16px; border: 1.5px solid #d1d5db; background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; color: #555; }
+.filt.active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.sep { width: 1px; height: 20px; background: #e5e7eb; margin: 0 4px; }
+
+.legend { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6b7280; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+.action-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.stat-text { font-size: 13px; font-weight: 700; color: #1e3a5f; flex: 1; }
+.btn { padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 12px; color: #fff; }
+.btn-green  { background: #16a34a; }
+.btn-gray   { background: #6b7280; }
+.btn-blue   { background: #1e3a5f; }
+.btn-export { background: #7c3aed; }
+.btn-mail   { background: #0ea5e9; }
+.btn-save   { background: #f59e0b; }
+.btn:hover  { opacity: .85; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* GRILLE */
+.grille { display: flex; flex-wrap: wrap; gap: 10px; }
+.card {
+  width: 110px; background: #fff; border-radius: 14px; padding: 10px 6px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; border: 2px solid #e5e7eb;
+  transition: transform .12s, box-shadow .12s;
+  position: relative; user-select: none;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.card.present { border-color: #22c55e; background: #f0fdf4; }
+.card.absent  { border-color: #d1d5db; background: #f9fafb; }
+.card.retard1 { border-color: #f59e0b; background: #fffbeb; }
+.card.retard2 { border-color: #ef4444; background: #fff1f2; }
+.card.exclu   { border-color: #6b7280; background: #f3f4f6; }
+
+.avatar-wrap { position: relative; }
+.avatar {
+  width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; letter-spacing: -1px;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.badge {
+  position: absolute; bottom: -4px; right: -4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #1e3a5f; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; border: 2px solid #fff;
+}
+.card.present .badge { background: #22c55e; }
+.card.absent  .badge { background: #9ca3af; }
+.card.retard1 .badge { background: #f59e0b; }
+.card.retard2 .badge { background: #ef4444; }
+.card.exclu   .badge { background: #6b7280; }
+
+.tiers-temps {
+  position: absolute; top: -8px; left: -8px;
+  background: #a855f7; color: #fff;
+  font-size: 8px; font-weight: 800;
+  padding: 2px 5px; border-radius: 6px;
+  white-space: nowrap; z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.redoublante {
+  position: absolute; top: -8px; right: -8px;
+  background: #7c3aed; color: #fff;
+  font-size: 8px; font-weight: 800;
+  padding: 2px 5px; border-radius: 6px;
+  white-space: nowrap; z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  cursor: pointer;
+}
+.redoublante:hover { opacity: .85; }
+
+.card-name   { font-size: 11px; font-weight: 800; color: #111; text-align: center; line-height: 1.2; }
+.card-prenom { font-size: 10px; color: #6b7280; text-align: center; }
+.card-status { font-size: 9px; font-weight: 700; text-align: center; padding: 2px 6px; border-radius: 10px; }
+.card.present .card-status { background: #dcfce7; color: #16a34a; }
+.card.absent  .card-status { background: #f3f4f6; color: #9ca3af; }
+.card.retard1 .card-status { background: #fef3c7; color: #d97706; }
+.card.retard2 .card-status { background: #fee2e2; color: #dc2626; }
+.card.exclu   .card-status { background: #f3f4f6; color: #6b7280; }
+
+/* RECAP */
+.stat-cards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.stat-card  { background: #fff; border-radius: 12px; padding: 12px 16px; flex: 1; min-width: 80px; border-top: 4px solid; }
+.stat-card .val { font-size: 22px; font-weight: 800; }
+.stat-card .lbl { font-size: 11px; color: #666; }
+.list-group { margin-bottom: 14px; }
+.list-group h3 { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+.list-item { background: #fff; border-radius: 8px; padding: 8px 12px; margin-bottom: 4px; font-size: 12px; display: flex; align-items: center; gap: 8px; }
+.export-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+
+/* BDD */
+.bdd-header { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.bdd-table-wrap { overflow-x: auto; }
+table.bdd { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.bdd th { background: #1e3a5f; color: #fff; padding: 8px 10px; text-align: left; white-space: nowrap; }
+table.bdd td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
+
+.hidden { display: none; }
+
+@media (max-width: 480px) {
+  .card { width: 90px; }
+  .avatar { width: 60px; height: 60px; font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>📋 Feuille d'appel</h1>
+    <p>BUT1 GCGP — 2026-2027 — IUT Marseille</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span id="header-user" style="font-size:12px;opacity:.8"></span>
+    <button onclick="logout()" style="padding:4px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:11px;cursor:pointer">⎋ Déco</button>
+    <div class="tab-bar">
+      <button class="tab active" onclick="showTab('appel')">Appel</button>
+      <button class="tab" id="tab-recap" onclick="showTab('recap')">Récap</button>
+      <button class="tab" onclick="showTab('bdd')">📊 Historique</button>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+
+  <!-- APPEL -->
+  <div id="panel-appel">
+    <div class="top-row">
+      <select id="inp-semestre" onchange="updateMatieres()" style="min-width:80px">
+        <option value="S1" selected>S1</option>
+        <option value="S2">S2</option>
+      </select>
+      <select id="inp-seance" style="flex:2;min-width:180px">
+        <option value="">— Choisir un cours —</option>
+      </select>
+      <input id="inp-seance-custom" placeholder="Intitulé du cours…" style="display:none;flex:2;min-width:180px;border-color:#f59e0b" />
+      <select id="inp-heure" style="min-width:120px">
+        <option value="">— Horaire —</option>
+        <option value="08:30">8h30</option>
+        <option value="10:30">10h30</option>
+        <option value="13:30">13h30</option>
+        <option value="15:30">15h30</option>
+      </select>
+      <input id="inp-enseignant" placeholder="Votre nom" style="min-width:140px" />
+      <input id="inp-date" type="date" style="min-width:140px" />
+    </div>
+
+    <div class="filter-bar" id="filter-tdtp">
+      <span class="filter-label">TD :</span>
+      <button class="filt active" onclick="setFilter('td','all')">Tous</button>
+      <button class="filt" onclick="setFilter('td','A')">TDA</button>
+      <button class="filt" onclick="setFilter('td','B')">TDB</button>
+      <div class="sep"></div>
+      <span class="filter-label">TP :</span>
+      <button class="filt active" onclick="setFilter('tp','all')">Tous</button>
+      <button class="filt" onclick="setFilter('tp','1')">TP1</button>
+      <button class="filt" onclick="setFilter('tp','2')">TP2</button>
+      <button class="filt" onclick="setFilter('tp','3')">TP3</button>
+      <button class="filt" onclick="setFilter('tp','4')">TP4</button>
+    </div>
+
+    <div class="legend">
+      <span style="font-size:12px;color:#666;font-weight:600">1 clic :</span>
+      <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Présent·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d1d5db"></div>Absent·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Retard &lt;15</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Retard &gt;15</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>Exclu·e</div>
+    </div>
+
+    <div class="action-bar">
+      <span class="stat-text" id="stat-inline">—</span>
+      <button class="btn btn-green" onclick="markVisible('present')">✓ Tous présents</button>
+      <button class="btn btn-gray"  onclick="markVisible('absent')">✗ Effacer</button>
+    </div>
+
+    <div id="grille" class="grille"></div>
+
+    <div style="margin-top:20px;text-align:center">
+      <button id="btn-amubox" onclick="showTab('recap');envoyerAMUBox()"
+        style="background:#16a34a;color:#fff;border:none;border-radius:12px;padding:14px 36px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(22,163,74,.3)">
+        ✅ Enregistrer l'appel
+      </button>
+      <button id="btn-corriger-appel" onclick="ouvrirCorrection()"
         style="background:#f59e0b;color:#fff;border:none;border-radius:12px;padding:14px 28px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,.3)">
         🔄 Corriger
       </button>
@@ -322,6 +639,7 @@ table.bdd td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
 </div>
 
 <script>
+
 // ─── CONFIG ──────────────────────────────────────────────────
 const GSHEETS_URL = 'https://script.google.com/macros/s/AKfycbwGwwAdBWU95kjAxM56bHlzs6lS9UfGfGUSgp-5MINP4fBOdKasG8e5k2brMrauMm7P5A/exec';
 const BDD_KEY     = 'appel_gcgp_bdd';
@@ -538,6 +856,50 @@ function toggle(id) {
   card.querySelector('.badge').textContent = BADGES[next];
   card.querySelector('.card-status').textContent = LABELS[next];
   updateStat();
+  sauvegarderAppelEnCours();
+}
+
+function sauvegarderAppelEnCours() {
+  const etat = {
+    date:       document.getElementById('inp-date').value,
+    heure:      document.getElementById('inp-heure').value,
+    semestre:   document.getElementById('inp-semestre').value,
+    seance:     document.getElementById('inp-seance').value,
+    seanceCustom: document.getElementById('inp-seance-custom').value,
+    enseignant: document.getElementById('inp-enseignant').value,
+    filterTD, filterTP, statuts,
+    ts: Date.now()
+  };
+  localStorage.setItem('gcgp_appel_en_cours', JSON.stringify(etat));
+}
+
+function restaurerAppelEnCours() {
+  try {
+    const raw = localStorage.getItem('gcgp_appel_en_cours');
+    if (!raw) return false;
+    const etat = JSON.parse(raw);
+    // Ne restaurer que si < 12h
+    if (Date.now() - etat.ts > 12 * 3600 * 1000) return false;
+
+    document.getElementById('inp-date').value      = etat.date || '';
+    document.getElementById('inp-heure').value     = etat.heure || '';
+    document.getElementById('inp-semestre').value  = etat.semestre || 'S1';
+    updateMatieres();
+    if (etat.seance) document.getElementById('inp-seance').value = etat.seance;
+    if (etat.seanceCustom) {
+      document.getElementById('inp-seance-custom').value = etat.seanceCustom;
+      document.getElementById('inp-seance-custom').style.display = etat.seance === '__autre__' ? 'block' : 'none';
+    }
+    document.getElementById('inp-enseignant').value = etat.enseignant || '';
+    filterTD = etat.filterTD || 'all';
+    filterTP = etat.filterTP || 'all';
+    statuts  = etat.statuts  || {};
+    return true;
+  } catch(e) { return false; }
+}
+
+function effacerAppelEnCours() {
+  localStorage.removeItem('gcgp_appel_en_cours');
 }
 
 function markVisible(statut) {
@@ -767,6 +1129,26 @@ function envoyerMail() {
 }
 
 // ─── CORRECTION APPEL ───────────────────────────────────────
+function ouvrirCorrection() {
+  // Restaurer le dernier appel sauvegardé
+  const restored = restaurerAppelEnCours();
+  if (restored) {
+    renderGrid();
+    // Mettre à jour les filtres visuels
+    document.querySelectorAll('.filter-bar .filt').forEach(b => {
+      const txt = b.textContent.trim();
+      const isTD = ['Tous','TDA','TDB'].includes(txt);
+      const isTP = ['Tous','TP1','TP2','TP3','TP4'].includes(txt);
+      if (isTD) b.classList.toggle('active', (txt==='Tous'?'all':txt.replace('TD','')) === filterTD);
+      if (isTP) b.classList.toggle('active', (txt==='Tous'?'all':txt.replace('TP','')) === filterTP);
+    });
+    alert('✅ Dernier appel restauré — modifiez les statuts puis cliquez "Corriger l'appel" dans le Récap.');
+  } else {
+    alert('Aucun appel en cours à corriger.\nFaites d'abord un appel avec "Enregistrer".');
+  }
+}
+
+// ─── CORRECTION APPEL ───────────────────────────────────────
 async function envoyerCorrection() {
   const seance = getSeanceLabel();
   const heure  = getHeureLabel();
@@ -892,6 +1274,6 @@ document.addEventListener('DOMContentLoaded', function() {
     showLoginModal();
   }
 });
-</script>
+/script>
 </body>
 </html>
