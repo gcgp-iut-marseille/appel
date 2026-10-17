@@ -74,6 +74,19 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
 .hidden{display:none}
 .mode-correction{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:8px 14px;font-size:12px;color:#92400e;margin-bottom:10px;display:none}
 @media(max-width:480px){.card{width:90px}.avatar{width:60px;height:60px;font-size:18px}}
+
+/* ── MODE VISIO ── */
+.visio-toggle-wrap{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1.5px solid #d1d5db;background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:#555;user-select:none;transition:all .2s}
+.visio-toggle-wrap.active{background:#0ea5e9;border-color:#0ea5e9;color:#fff}
+.visio-toggle-wrap input[type=checkbox]{accent-color:#0ea5e9;width:14px;height:14px}
+/* Statuts visio */
+.card.connecte{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981}
+.card.non_connecte{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px solid #94a3b8}
+/* Badge mode visio inline */
+#visio-legend{display:none}
+body.mode-visio #visio-legend{display:flex}
+body.mode-visio .legend-presentiel{display:none}
+body.mode-visio .markAll-present-btn{display:none}
 </style>
 </head>
 <body>
@@ -99,6 +112,10 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
   <!-- APPEL -->
   <div id="panel-appel">
     <div class="top-row">
+      <label class="visio-toggle-wrap" id="visio-label">
+        <input type="checkbox" id="chk-visio" onchange="toggleModeVisio()">
+        📹 Visio
+      </label>
       <select id="inp-semestre" onchange="updateMatieres()" style="min-width:80px">
         <option value="S1" selected>S1</option>
         <option value="S2">S2</option>
@@ -130,7 +147,7 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
       <button class="filt" onclick="setFilter('tp','3')">TP3</button>
       <button class="filt" onclick="setFilter('tp','4')">TP4</button>
     </div>
-    <div class="legend">
+    <div class="legend legend-presentiel">
       <span style="font-size:12px;color:#666;font-weight:600">1 clic :</span>
       <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Présent·e</div>
       <div class="legend-item"><div class="legend-dot" style="background:#d1d5db"></div>Absent·e</div>
@@ -138,9 +155,14 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
       <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Retard &gt;15</div>
       <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>Exclu·e</div>
     </div>
+    <div class="legend" id="visio-legend">
+      <span style="font-size:12px;color:#666;font-weight:600">📹 Mode visio :</span>
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Connecté·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Non connecté·e</div>
+    </div>
     <div class="action-bar">
       <span class="stat-text" id="stat-inline">—</span>
-      <button class="btn" style="background:#16a34a" onclick="markAll('present')">✓ Tous présents</button>
+      <button class="btn" style="background:#16a34a" class="markAll-present-btn" onclick="markAll('present')">✓ Tous présents</button>
       <button class="btn" style="background:#6b7280" onclick="markAll('absent')">✗ Effacer</button>
     </div>
     <div id="mode-correction-bar" class="mode-correction">
@@ -402,6 +424,38 @@ const COLORS = [['#dbeafe','#1e40af'],['#dcfce7','#166534'],['#fef3c7','#92400e'
 let statuts  = {};
 let filterTD = 'all';
 let filterTP = 'all';
+
+// ═══════════════════════════════════════════════════════════
+// MODE VISIO
+// ═══════════════════════════════════════════════════════════
+let modeVisio = false;
+
+const CYCLE_VISIO  = ['connecte', 'non_connecte'];
+const LABELS_VISIO = { connecte: 'Connecté·e', non_connecte: 'Non connecté·e' };
+const BADGES_VISIO = { connecte: '📶', non_connecte: '✗' };
+
+function getCycleActuel()  { return modeVisio ? CYCLE_VISIO  : CYCLE;  }
+function getLabelsActuels(){ return modeVisio ? LABELS_VISIO : LABELS; }
+function getBadgesActuels(){ return modeVisio ? BADGES_VISIO : BADGES; }
+
+function getStatut(id) {
+  const def = modeVisio ? 'connecte' : 'present';
+  return statuts[id] || def;
+}
+
+function toggleModeVisio() {
+  const chk = document.getElementById('chk-visio');
+  modeVisio = chk.checked;
+  const label = document.getElementById('visio-label');
+  label.classList.toggle('active', modeVisio);
+  document.body.classList.toggle('mode-visio', modeVisio);
+  // Remettre tous les statuts à zéro lors du changement de mode
+  statuts = {};
+  renderGrid();
+  updateStat();
+  sauvegarder();
+}
+
 let modeCorrection = false;
 
 // ═══════════════════════════════════════════════════════════
@@ -533,7 +587,6 @@ function effacerSauvegarde() {
 // ═══════════════════════════════════════════════════════════
 // GRILLE ET STATUTS
 // ═══════════════════════════════════════════════════════════
-function getStatut(id) { return statuts[id] || 'present'; }
 function getColor(i)   { return COLORS[i % COLORS.length]; }
 function initials(pr, n) { return (pr[0] || '') + (n[0] || ''); }
 
@@ -564,41 +617,53 @@ function renderGrid() {
       <div class="avatar-wrap">
         ${tiersBadge}${redoubBadge}
         <div class="avatar" style="background:${bg}">${inner}</div>
-        <div class="badge">${BADGES[st]}</div>
+        <div class="badge">${getBadgesActuels()[st]}</div>
       </div>
       <div style="text-align:center">
         <div class="card-name">${s.nom}</div>
         <div class="card-prenom">${s.prenom}</div>
       </div>
-      <div class="card-status">${LABELS[st]}</div>
+      <div class="card-status">${getLabelsActuels()[st]}</div>
     </div>`;
   }).join('');
   updateStat();
 }
 
 function toggle(id) {
+  const cycle  = getCycleActuel();
+  const labels = getLabelsActuels();
+  const badges = getBadgesActuels();
   const cur  = getStatut(id);
-  const next = CYCLE[(CYCLE.indexOf(cur) + 1) % CYCLE.length];
+  const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
   statuts[id] = next;
   const card = document.getElementById('card-' + id);
   if (!card) return;
-  CYCLE.forEach(c => card.classList.toggle(c, c === next));
-  card.querySelector('.badge').textContent = BADGES[next];
-  card.querySelector('.card-status').textContent = LABELS[next];
+  // Nettoyer toutes les classes de statut (les deux modes)
+  [...CYCLE, ...CYCLE_VISIO].forEach(c => card.classList.remove(c));
+  card.classList.add(next);
+  card.querySelector('.badge').textContent = badges[next];
+  card.querySelector('.card-status').textContent = labels[next];
   updateStat();
   sauvegarder();
 }
 
 function markAll(s) {
-  visible().forEach(e => { statuts[e.id] = s; });
+  // En mode visio, 'present' → 'connecte'
+  const mapped = (modeVisio && s === 'present') ? 'connecte' : s;
+  visible().forEach(e => { statuts[e.id] = mapped; });
   renderGrid();
   sauvegarder();
 }
 
 function updateStat() {
   const vis = visible();
-  const nb = vis.filter(s => getStatut(s.id) !== 'present').length;
-  document.getElementById('stat-inline').textContent = `${vis.length - nb} présent·e·s / ${vis.length}`;
+  if (modeVisio) {
+    const nb = vis.filter(s => getStatut(s.id) !== 'connecte').length;
+    document.getElementById('stat-inline').textContent = `📹 ${vis.length - nb} connecté·e·s / ${vis.length}`;
+  } else {
+    const nb = vis.filter(s => getStatut(s.id) !== 'present').length;
+    document.getElementById('stat-inline').textContent = `${vis.length - nb} présent·e·s / ${vis.length}`;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -694,7 +759,7 @@ async function envoyerAppel() {
 
   // Construire la liste des étudiants à envoyer
   const nonPresents = vis.filter(s => getStatut(s.id) !== 'present')
-    .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)]}));
+    .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:getLabelsActuels()[getStatut(s.id)]}));
 
   let etudiants;
   if (estCorrection) {
@@ -710,6 +775,7 @@ async function envoyerAppel() {
 
   const payload = {
     type: estCorrection ? 'correction' : 'appel',
+    mode: modeVisio ? 'visio' : 'presentiel',
     date, heure, semestre: sem, cours: seance, groupe: label,
     duree_heures: duree, pwd, enseignant: ens,
     enregistre_le: new Date().toISOString(),
@@ -755,7 +821,7 @@ function envoyerMail() {
   const heure  = getHeureLabel();
   const ens    = document.getElementById('inp-enseignant').value || getAuth()?.nom || '';
   const abs    = vis.filter(s => getStatut(s.id) !== 'present');
-  const corps  = `Appel BUT1 GCGP\nDate: ${date} | Heure: ${heure} | Cours: ${seance}\nEnseignant: ${ens}\n\nNon présents:\n${abs.map(s => `- ${s.nom} ${s.prenom} (${LABELS[getStatut(s.id)]})`).join('\n') || 'Aucun'}`;
+  const corps  = `Appel BUT1 GCGP\nDate: ${date} | Heure: ${heure} | Cours: ${seance}\nEnseignant: ${ens}\n\nNon présents:\n${abs.map(s => `- ${s.nom} ${s.prenom} (${getLabelsActuels()[getStatut(s.id)]})`).join('\n') || 'Aucun'}`;
   window.location.href = `mailto:fabien.girard@univ-amu.fr?subject=Appel ${seance} ${date}&body=${encodeURIComponent(corps)}`;
 }
 
@@ -775,7 +841,7 @@ function sauvegarderBDD() {
   const ens    = document.getElementById('inp-enseignant').value || getAuth()?.nom || '';
   const duree  = getDuree(seance);
   const bdd    = getBDD();
-  vis.forEach(s => bdd.push({date, heure, semestre:sem, cours:seance, groupe:label, duree_heures:duree, enseignant:ens, id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:LABELS[getStatut(s.id)]}));
+  vis.forEach(s => bdd.push({date, heure, semestre:sem, cours:seance, groupe:label, duree_heures:duree, enseignant:ens, id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:getLabelsActuels()[getStatut(s.id)]}));
   saveBDD(bdd);
   renderBDD();
 }
@@ -834,7 +900,7 @@ function exportXLSX() {
   const wb = XLSX.utils.book_new();
   const rows = [
     ['Date','Heure','Cours','Groupe','Durée','Enseignant','N° étudiant','Nom','Prénom','TD','TP','Statut','Statut label'],
-    ...vis.map(s => [date,heure,seance,label,getDuree(seance),ens,s.id,s.nom,s.prenom,s.td,s.tp,getStatut(s.id),LABELS[getStatut(s.id)]])
+    ...vis.map(s => [date,heure,seance,label,getDuree(seance),ens,s.id,s.nom,s.prenom,s.td,s.tp,getStatut(s.id),getLabelsActuels()[getStatut(s.id)]])
   ];
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, 'Appel');
