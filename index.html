@@ -520,7 +520,7 @@ function logout() {
 // ═══════════════════════════════════════════════════════════
 function sauvegarder() {
   // Ne sauvegarder que si au moins un statut modifié
-  const hasChange = Object.values(statuts).some(s => s !== 'present');
+  const hasChange = Object.values(statuts).some(s => s !== (modeVisio ? 'connecte' : 'present'));
   if (!hasChange) return;
   const etat = {
     date:       document.getElementById('inp-date').value,
@@ -757,19 +757,21 @@ async function envoyerAppel() {
   const estCorrection = bdd.some(r => r.date === date && r.heure === heure && r.cours === seance && r.groupe === label);
 
   // Construire la liste des étudiants à envoyer
-  const nonPresents = vis.filter(s => getStatut(s.id) !== 'present')
+  const statutNeutre = modeVisio ? 'connecte' : 'present';
+  const nonPresents = vis.filter(s => getStatut(s.id) !== statutNeutre)
     .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:getStatut(s.id), statut_label:getLabelsActuels()[getStatut(s.id)]}));
 
   let etudiants;
   if (estCorrection) {
-    // Mode correction : envoyer non-présents + présents (pour suppression)
-    const presents = vis.filter(s => getStatut(s.id) === 'present')
+    // Mode correction : envoyer non-présents/non-connectés + présents/connectés (pour suppression)
+    const presents = vis.filter(s => getStatut(s.id) === statutNeutre)
       .map(s => ({id:s.id, nom:s.nom, prenom:s.prenom, td:s.td, tp:s.tp, statut:'a_supprimer', statut_label:''}));
     etudiants = [...nonPresents, ...presents];
   } else {
-    // Premier appel : non-présents ou marqueur si tous présents
+    // Premier appel : non-présents/non-connectés ou marqueur si tous présents/connectés
+    const tousLabel = modeVisio ? `Tous connectés (${vis.length})` : `Tous présents (${vis.length})`;
     etudiants = nonPresents.length ? nonPresents
-      : [{id:'—', nom:'APPEL FAIT', prenom:'', td:'', tp:'', statut:'appel_fait', statut_label:`Tous présents (${vis.length})`}];
+      : [{id:'—', nom:'APPEL FAIT', prenom:'', td:'', tp:'', statut:'appel_fait', statut_label:tousLabel}];
   }
 
   const payload = {
