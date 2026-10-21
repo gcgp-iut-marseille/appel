@@ -82,6 +82,7 @@ table.bdd td{padding:8px 10px;border-bottom:1px solid #f3f4f6}
 /* Statuts visio */
 .card.connecte{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border:2px solid #10b981}
 .card.non_connecte{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border:2px solid #94a3b8}
+.card.pb_connexion{background:linear-gradient(135deg,#fef9c3,#fde68a);border:2px solid #f59e0b}
 /* Badge mode visio inline */
 #visio-legend{display:none}
 body.mode-visio #visio-legend{display:flex}
@@ -429,9 +430,9 @@ let filterTP = 'all';
 // ═══════════════════════════════════════════════════════════
 let modeVisio = false;
 
-const CYCLE_VISIO  = ['connecte', 'non_connecte'];
-const LABELS_VISIO = { connecte: 'Connecté·e', non_connecte: 'Non connecté·e' };
-const BADGES_VISIO = { connecte: '📶', non_connecte: '✗' };
+const CYCLE_VISIO  = ['connecte', 'non_connecte', 'pb_connexion'];
+const LABELS_VISIO = { connecte: 'Connecté·e', non_connecte: 'Non connecté·e', pb_connexion: 'Pb connexion' };
+const BADGES_VISIO = { connecte: '📶', non_connecte: '✗', pb_connexion: '⚠️' };
 
 function getCycleActuel()  { return modeVisio ? CYCLE_VISIO  : CYCLE;  }
 function getLabelsActuels(){ return modeVisio ? LABELS_VISIO : LABELS; }
