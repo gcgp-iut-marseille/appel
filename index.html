@@ -158,12 +158,8 @@ body.mode-visio .markAll-present-btn{display:none}
     </div>
     <div class="legend" id="visio-legend">
       <span style="font-size:12px;color:#666;font-weight:600">📹 Mode visio :</span>
-      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>📶 Connecté·e</div>
-      <span style="font-size:11px;color:#aaa">→</span>
-      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>✗ Non connecté·e</div>
-      <span style="font-size:11px;color:#aaa">→</span>
-      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>⚠️ Pb connexion</div>
-      <span style="font-size:11px;color:#aaa">→ 🔄</span>
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Connecté·e</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#94a3b8"></div>Non connecté·e</div>
     </div>
     <div class="action-bar">
       <span class="stat-text" id="stat-inline">—</span>
@@ -352,9 +348,9 @@ const STUDENTS = [
   {id:"2627-026",num:"25036942",nom:"FERRER--MAZELIER",prenom:"Vincent",td:"A",tp:"1"},
   {id:"2627-010",num:"26017306",nom:"GUIDOUM",prenom:"Aymen",td:"A",tp:"1"},
   {id:"2627-028",num:"26017448",nom:"MERABET",prenom:"Fares",td:"A",tp:"1"},
-  {id:"2627-012",num:"26002824",nom:"MORO",prenom:"Cyndie",td:"A",tp:"1",sport_hn:true},
+  {id:"2627-012",num:"26002824",nom:"MORO",prenom:"Cyndie",td:"A",tp:"1",sport_hn:true,tiers_temps:true},
   {id:"2627-063",num:"26007348",nom:"NEFNAF",prenom:"Mounib",td:"A",tp:"1"},
-  {id:"2627-013",num:"26010006",nom:"NEGRI",prenom:"Baptiste",td:"A",tp:"1"},
+  {id:"2627-013",num:"26010006",nom:"NEGRI",prenom:"Baptiste",td:"A",tp:"1",tiers_temps:true},
   {id:"2627-062",num:"26004719",nom:"NAIR",prenom:"Mohammed",td:"A",tp:"1"},
   {id:"2627-046",num:"26015910",nom:"POIROT",prenom:"Candice",td:"A",tp:"1"},
   {id:"2627-015",num:"26014778",nom:"SARIKAYA",prenom:"Boran",td:"A",tp:"1"},
@@ -393,7 +389,7 @@ const STUDENTS = [
   {id:"2627-059",num:"26006370",nom:"LEFRERE",prenom:"Lily-Violet",td:"B",tp:"4",tiers_temps:true},
   {id:"2627-011",num:"26019109",nom:"MAOULIDA",prenom:"Aimane",td:"B",tp:"4"},
   {id:"2627-060",num:"26012248",nom:"MORIN",prenom:"Lucas",td:"B",tp:"3"},
-  {id:"2627-061",num:"26003460",nom:"MOSCATI",prenom:"Eddy",td:"B",tp:"4"},
+  {id:"2627-061",num:"26003460",nom:"MOSCATI",prenom:"Eddy",td:"B",tp:"4",tiers_temps:true},
   {id:"2627-044",num:"26013725",nom:"OUARI",prenom:"Kylian",td:"B",tp:"4"},
   {id:"2627-064",num:"26014725",nom:"OULAHSEN",prenom:"Amine",td:"B",tp:"4"},
   {id:"2627-065",num:"26022345",nom:"SCHNEIDER",prenom:"Maxence",td:"B",tp:"4"},
@@ -609,11 +605,8 @@ function renderGrid() {
     const inner = photo
       ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover">`
       : `<span style="color:${fg}">${initials(s.prenom, s.nom)}</span>`;
-    const tiersBadge = s.tiers_temps
-      ? '<div class="tiers-temps">1/3 temps</div>'
-      : s.sport_hn
-      ? '<div class="sport-hn">🏅 SHN</div>'
-      : '';
+    const tiersBadge = (s.tiers_temps ? '<div class="tiers-temps">1/3 temps</div>' : '')
+      + (s.sport_hn ? '<div class="sport-hn">🏅 SHN</div>' : '');
     const redoubBadge = s.redoublante
       ? `<div class="redoublante" onclick="event.stopPropagation();afficherMatieres('${s.prenom} ${s.nom}',${JSON.stringify(s.matieres_s1||[])})">Redoubl.</div>`
       : '';
